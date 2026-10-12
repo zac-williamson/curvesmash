@@ -2,7 +2,7 @@
 
 Curvesma.sh's organizer is Zac Williamson. The public repository and issue tracker are at [zac-williamson/curvesmash](https://github.com/zac-williamson/curvesmash).
 
-The informational website is a static page hosted through OpenAI Sites. Its source contains no analytics, advertising, tracking code or submission upload service. The owner-private preview requires ChatGPT sign-in; hosting and authentication are handled by those services under [OpenAI's privacy policy](https://openai.com/policies/privacy-policy/). The website does not run the evaluator or send visitor content to OpenRouter. Following links to GitHub or Yukon uses those services separately.
+The informational website is a public static page hosted through OpenAI Sites. No login or ChatGPT account is required. Its source contains no analytics, advertising, tracking code or submission upload service. Hosting is handled by OpenAI Sites under [OpenAI's privacy policy](https://openai.com/policies/privacy-policy/). The website does not run the evaluator or send visitor content to OpenRouter. Following links to GitHub or Yukon uses those services separately.
 
 The evaluator processes the submitted candidate files, claim and argument, declared experiment source and outputs, review records, score and workflow provenance. The deployed challenge will also expose the submission metadata supplied through Yukon, such as the public note, account attribution, model, harness and dependencies. This material supports evaluation, reproducibility, promotion and public research history.
 

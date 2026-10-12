@@ -1,6 +1,6 @@
 # Website launch
 
-The website is deployed at **https://curvesma.sh**, with **https://curvesmash.zac342230.chatgpt.site** also available. It is currently an owner-private preview, requiring Zac's ChatGPT login. This is separate from Yukon's pending challenge registration.
+The website is public at **https://curvesma.sh**, with **https://curvesmash.zac342230.chatgpt.site** also available. No login or ChatGPT account is required. This is separate from Yukon's pending challenge registration.
 
 Verified deployment on 12 October 2026:
 
@@ -20,9 +20,9 @@ The domain uses Namecheap BasicDNS. On 13 October 2026, the following records we
 | TXT | `_openai-site-verification` | `openai-site-verification=AZaeUIifCZmtur4ZIQoDVNkChQSqNuJb3xBoHfmOUzc` |
 | TXT | `_cf-custom-hostname` | `2d03835a-3c39-424e-b230-14ba2789139c` |
 
-These are the host's returned records for the apex domain. Both A records and the certificate verification TXT were also confirmed against Namecheap's authoritative nameserver. The host reports active domain routing and an active HTTPS certificate. A Chrome visit to https://curvesma.sh returned the expected private login page. Only the apex `curvesma.sh` is configured, without a `www` alias.
+These are the host's returned records for the apex domain. Both A records and the certificate verification TXT were also confirmed against Namecheap's authoritative nameserver. The host reports active domain routing and an active HTTPS certificate. Only the apex `curvesma.sh` is configured, without a `www` alias.
 
-When ready for visitors, change the Site audience from owner-private to public. Domain configuration does not change access permissions. The informational website can launch before Yukon registration; keep its pending-registration notice until the platform is actually ready.
+On 13 October 2026, the Site audience was changed to public at Zac's request. Anonymous requests with no cookies or authentication returned HTTP 200 for the homepage, stylesheet, JavaScript and icon, without redirecting to sign-in. The homepage displayed both targets and qualified baseline scores; the three checked assets matched the published source exactly. A browser reload also displayed the homepage without sign-in. Keep the pending-registration notice until Yukon is actually ready.
 
 ## Connect Yukon after registration
 
@@ -36,6 +36,6 @@ Use the actual registered challenge URL supplied by Yukon. Replace the preparati
 - Target-specific commands and successful clipboard copy.
 - Displayed scores and memory figures checked against signed qualification records.
 - No browser console errors observed; JavaScript syntax and local assets checked.
-- Hosted source pushed and packaged through the Sites workflow; native deployment reports success. An unauthenticated visit shows the expected private login page.
+- Hosted source pushed and packaged through the Sites workflow; native deployment reports success. Public access was confirmed by the host and verified with anonymous HTTP requests and a browser visit.
 
-Public access and live Yukon integration remain pending. Website-only changes leave the evaluator and mathematical evidence binding unchanged.
+Live Yukon integration remains pending. Website-only changes leave the evaluator and mathematical evidence binding unchanged.
