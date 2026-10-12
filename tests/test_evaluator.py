@@ -25,6 +25,8 @@ class Evaluation(unittest.TestCase):
         self.root = Path(self.temp.name).resolve() / "organizer"
         shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns(
             ".git", ".venv", "__pycache__", ".env", "scores", "reports"))
+        # Organizer fixtures never load real production history or contact GitHub.
+        (self.root / "reorg/plan.json").write_text('{"schema_version":1,"entries":[]}\n')
         self.policy = common.read_json(self.root / intake.POLICY)
         self.keys = {}
         for name in (*review.OBLIGATIONS, "defender", "adjudicator", "execution", "definitions"):
