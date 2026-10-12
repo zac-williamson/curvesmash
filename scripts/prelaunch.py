@@ -90,8 +90,8 @@ def validate(root=ROOT):
 
 def readiness_errors(profiles, cost):
     # No status field or participant claim can enable scoring in this scaffold.
-    errors = ["Independent verifiers, isolated execution, authenticated review and scoring are not implemented.",
-              "Live Yukon registration, baseline jobs and manual promotion have not been verified.",
+    errors = ["Evaluator is implemented; production review identities, model configuration and scientific approval are not provisioned.",
+              "Live Yukon registration, separated runner jobs, baseline jobs and manual promotion have not been verified.",
               "Scientific review committee and held-out calibration are not established."]
     errors.append("Versioned target/cost definitions need independent scientific review; both baselines remain unqualified.")
     return errors
@@ -111,7 +111,7 @@ def main():
             for error in readiness_errors(profiles, cost):
                 print(f"- {error}")
             return 2
-        print("Specifications consistent: two production tracks; no scores; evaluation pending.")
+        print("Specifications consistent: two production tracks; evaluator implemented; production qualification pending.")
         return 0
     except (ValueError, KeyError, TypeError, OSError) as exc:
         print(f"Prelaunch check failed: {exc}", file=sys.stderr)

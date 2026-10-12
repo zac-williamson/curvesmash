@@ -46,5 +46,17 @@
     "lookup": "(L+1)*(compare+64)+move+256",
     "pairing": "(128*512+48*k)*E+2^26",
     "memory": "2*m*W*32+2^20"
-  }
+  },
+  "components": {
+    "setup": "16777216",
+    "baby_table": "26554743013579237146153626469005290262239379456",
+    "merge_sort": "21603846911076541168362727076628100209442816",
+    "giant_search": "26562555896723741893274745549991923660296348880",
+    "verification_and_output": "79926919168"
+  },
+  "preprocessing_components": [
+    "setup",
+    "baby_table",
+    "merge_sort"
+  ]
 }

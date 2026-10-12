@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "rigorous-review-v1",
+  "reviewers": {},
+  "definition_approvers": {},
+  "maximum_review_age_days": 30,
+  "maximum_definition_age_days": 365,
+  "minimum_distinct_initial_reviewers": 4,
+  "experiment_image": null,
+  "experiment_max_trials": 8,
+  "experiment_timeout_seconds": 30,
+  "experiment_memory_bytes": 536870912,
+  "experiment_output_bytes": 65536,
+  "provider": {
+    "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+    "models": {},
+    "timeout_seconds": 60,
+    "max_tokens": 12000
+  }
+}

@@ -28,16 +28,18 @@ Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/mai
 
 ## Current status
 
-Private prelaunch starter. Version 1 specifications and two analytic baseline packages are written. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls; best-known attack selection and independent qualification remain pending. Attack evaluation, Yukon integration and the website remain outstanding. Nothing is open or scored.
+Private prelaunch project. Version 1 specifications, two analytic baseline packages and the [evaluator](docs/EVALUATION.md) are implemented. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls; best-known attack selection and independent qualification remain pending. Production review provisioning, Yukon integration and the website remain outstanding. Nothing is open or scored.
 
 - [secp256k1 baseline](candidates/secp256k1-ecdlp/README.md)
 - [BLS12-381 inversion baseline](candidates/bls12-381-invert-g1/README.md)
 
-The local checker checks draft consistency and never executes submissions or writes scores:
+Install the hash-locked organizer environment, then run the checks:
 
 ```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements.lock
 bash .yukon/setup.sh
-python3 -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-`python3 scripts/prelaunch.py --require-ready` deliberately fails until the evaluation system is implemented. Passing local checks establishes neither scientific qualification nor Yukon readiness.
+The manifest remains closed on the prelaunch gate until production review and Yukon jobs are provisioned. Passing local checks establishes neither scientific qualification nor Yukon readiness. See [EVALUATION.md](docs/EVALUATION.md) for the complete review and scoring protocol.

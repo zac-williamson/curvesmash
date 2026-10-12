@@ -20,7 +20,7 @@ class DraftGates(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name) / "starter"
         shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns(
-            ".git", "__pycache__", ".env", ".yukon/scores"))
+            ".git", ".venv", "__pycache__", ".env", "scores", "reports"))
 
     def change(self, path, mutation):
         file = self.root / path
