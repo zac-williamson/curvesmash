@@ -9,17 +9,17 @@ AI-assisted research into elliptic-curve discrete logarithms and pairing inversi
 | `secp256k1-ecdlp` | Fixed generator P; Q = [x]P for uniform x in Z/rZ | x such that [x]P = Q |
 | `bls12-381-invert-g1` | Fixed G2 generator Q0; uniform z in GT | P in G1 such that e(P,Q0) = z |
 
-Both use full production parameters. Small or restricted instances provide supporting evidence only.
+Both use full production parameters. Exact parameters, encodings and the pinned pairing convention are in [production-v1](target-profiles/production-v1.json). Small or restricted instances provide supporting evidence only.
 
 ## One metric
 
-**log₂ expected total classical attack computation; lower is better.** The draft requires at least 90% success over random challenges and algorithm randomness, and charges preprocessing, failed trials, verification, and amplification. Publish memory costs and assumptions alongside the score.
+**log₂ total classical attack work budget; lower is better.** The algorithm must return a valid result within that budget with probability at least 39% over uniform challenges and fresh algorithm randomness. Charge preprocessing, failed trials, verification and amplification. Publish memory costs and assumptions alongside the score.
 
-The success convention and operation prices need scientific approval. Scores will represent reviewed full-size attack-cost claims. Executed experiments must be identified separately.
+The [cost model](cost-models/classical-word-ram-v1.json) uses HashSmash's 256-bit word-RAM primitives and success threshold. Each primitive costs one word-operation; higher arithmetic must supply a complete implementation ledger. Scores represent reviewed full-size complexity claims; experiments are separate evidence. Independent scientific review is pending.
 
 ## Build sequence
 
-1. Lock exact parameters, pairing conventions, encodings, and the computation model. Review a best-known baseline for each track.
+1. Review the versioned target/cost specifications and qualify a best-known baseline for each track.
 2. Implement independent mathematical checks, isolated experiments, and cryptanalysis/cost review. Bind each score to its submission, definitions, and evidence; require manual promotion.
 3. Register with Yukon while submissions remain closed, then verify baseline runs and the review/promotion lifecycle.
 4. Connect curvesma.sh to a two-row results page with baseline cost, best accepted cost, and evidence links.
@@ -28,7 +28,7 @@ Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/mai
 
 ## Current status
 
-Private prelaunch starter. The target and cost definitions are drafts; baselines, attack verification, isolated execution, scientific review, Yukon integration, and the website remain to be built. The manifest has no production runner. Nothing is open or scored.
+Private prelaunch starter. Version 1 target and cost specifications are complete, with encoding/reference vectors. Independent scientific review, qualified baselines, attack evaluation, Yukon integration and the website remain outstanding. The manifest has no production runner. Nothing is open or scored.
 
 The local checker checks draft consistency and never executes submissions or writes scores:
 

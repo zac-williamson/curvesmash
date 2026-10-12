@@ -39,16 +39,21 @@ def relative_path(value):
 
 def validate(root=ROOT):
     manifest = read_json(root / "benchmark.json")
-    profiles = read_json(root / "target-profiles/production-draft.json")
-    cost = read_json(root / "cost-models/production-draft.json")
+    profiles = read_json(root / "target-profiles/production-v1.json")
+    cost = read_json(root / "cost-models/classical-word-ram-v1.json")
     if manifest.get("schemaVersion") != 2 or manifest.get("name") != "curvesmash":
         raise ValueError("Wrong manifest identity or schema")
-    if profiles.get("state") != "draft" or cost.get("state") != "draft":
+    if any(spec.get("state") != "specified" or spec.get("scientific_review") != "pending"
+           for spec in (profiles, cost)):
         raise ValueError("This scaffold cannot assert scientific qualification")
+    if profiles.get("cost_model") != cost.get("id") or cost.get("id") != "classical-word-ram-v1":
+        raise ValueError("Target and cost model versions differ")
     if cost.get("metric") != "time_log2" or cost.get("direction") != "-":
         raise ValueError("Changed headline metric")
-    if cost.get("success_probability_minimum") != 0.9:
-        raise ValueError("Changed draft success contract")
+    if cost.get("success_probability_minimum") != 0.39:
+        raise ValueError("Changed success contract")
+    if cost.get("word_bits") != 256 or cost.get("time_unit") != "word-operations":
+        raise ValueError("Changed computation units")
     targets = profiles["targets"]
     if len(targets) != 2 or {t["id"] for t in targets} != TARGETS:
         raise ValueError("Expected the two fixed production targets")
@@ -88,9 +93,7 @@ def readiness_errors(profiles, cost):
     errors = ["Independent verifiers, isolated execution, authenticated review and scoring are not implemented.",
               "Live Yukon registration, baseline jobs and manual promotion have not been verified.",
               "Scientific review committee and held-out calibration are not established."]
-    errors.extend(cost["unresolved"])
-    for target in profiles["targets"]:
-        errors.extend(f"{target['id']}: {item}" for item in target["unresolved"])
+    errors.append("Versioned target/cost definitions need independent scientific review; both baselines remain unqualified.")
     return errors
 
 
@@ -108,7 +111,7 @@ def main():
             for error in readiness_errors(profiles, cost):
                 print(f"- {error}")
             return 2
-        print("Draft consistent: two production tracks; no scores; evaluation pending.")
+        print("Specifications consistent: two production tracks; no scores; evaluation pending.")
         return 0
     except (ValueError, KeyError, TypeError, OSError) as exc:
         print(f"Prelaunch check failed: {exc}", file=sys.stderr)

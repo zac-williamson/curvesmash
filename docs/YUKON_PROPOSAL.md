@@ -4,11 +4,11 @@ Draft for [Yukon's challenge form](https://www.yukon.org/create). Not submitted.
 
 ## Problem
 
-Curvesma.sh is an AI-assisted cryptanalysis challenge with two production targets: secp256k1 discrete logarithms and BLS12-381 pairing inversion into G1 with a fixed G2 generator. Both minimize log₂ expected total classical attack computation under a fixed success and cost contract. Submissions must support their full-size complexity claims; smaller experiments supply evidence.
+Curvesma.sh is an AI-assisted cryptanalysis challenge with two production targets: secp256k1 discrete logarithms and BLS12-381 pairing inversion into G1 with a fixed G2 generator. Both minimize log₂ classical word-operation work budget with at least 39% success. Submissions must support their full-size complexity claims; smaller experiments supply evidence.
 
 ## Evaluation
 
-Independent algebraic checks and isolated experiments support cryptanalysis and cost review. Scores include preprocessing and are bound to the exact submission, target definitions, and evidence. Owner approval is required before promotion. The evaluation system and reviewed baselines remain to be implemented.
+Independent algebraic checks and isolated experiments will support cryptanalysis and cost review. Scores include preprocessing and are bound to the exact submission, target definitions, and evidence. Owner approval is required before promotion. Versioned target/cost specifications are written; independent scientific review, evaluation infrastructure and baseline qualification remain outstanding.
 
 ## Integration
 

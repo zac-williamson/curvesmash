@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "id": "classical-word-ram-v1",
+  "version": 1,
+  "state": "specified",
+  "scientific_review": "pending",
+  "metric": "time_log2",
+  "score_metric": "timeLog2",
+  "direction": "-",
+  "time_unit": "word-operations",
+  "word_bits": 256,
+  "success_probability_minimum": 0.39,
+  "score": "log2(T), where integer T>=1 bounds the complete attack work budget. The algorithm stops or reports failure within T operations and returns a valid output with probability at least 0.39. An expected runtime alone is insufficient.",
+  "probability_space": "Uniform challenge from the selected profile and fresh independent algorithm coins. The target parameters remain fixed. Reproducible seeds are experimental evidence, not a proof of ideal independent coins.",
+  "scope": "One classical cold attack on one target. Precomputation is charged in full without amortization over future targets. Quantum algorithms and external advice/oracles with uncharged construction are out of scope.",
+  "primitive_operations": {
+    "load_256_bits": 1,
+    "store_256_bits": 1,
+    "add_mod_2^256": 1,
+    "subtract_mod_2^256": 1,
+    "one_bitwise_AND_OR_XOR_NOT": 1,
+    "shift_or_rotate_256_bits": 1,
+    "compare_256_bits": 1,
+    "conditional_branch": 1,
+    "independent_uniform_256_bit_word": 1
+  },
+  "machine": "256-bit word RAM with 256-bit addresses and finite bounded-size instructions operating on a constant number of registers. A shift/rotation count is 0..255. Word arithmetic wraps modulo 2^256. Each listed instruction costs one operation; memory transfers are charged separately from arithmetic.",
+  "arithmetic": "Integer/field multiplication, division, reduction, inversion, extension arithmetic, point operations, pairings, hashing and PRNG expansion must be lowered to the listed primitives with a justified ledger. They are not unit-cost oracles. Faster constructions are allowed with reviewed full costs.",
+  "total_time_includes": [
+    "preprocessing and advice construction",
+    "all trials and failures",
+    "randomness and rejection sampling by the attack",
+    "sorting, lookup and memory transfers",
+    "output construction and attack-side verification",
+    "restarts and amplification"
+  ],
+  "parallel_computation": "Sum all processors' work, including coordination; elapsed time does not define the score.",
+  "nonuniform_advice": "Charge construction/search of embedded or stored precomputed results, including parameter-dependent tables. Include advice in peak memory. Public profile constants and algorithm design effort are excluded; embedding searched results in code does not make their construction free.",
+  "organizer_work": "Challenge generation and organizer review/verification are excluded. Any equivalent work performed by the attack is charged. The attack receives only public inputs and profile constants, never the challenge sampling secret.",
+  "memory": "Report a reviewed bound in bytes on peak total storage, including code, advice, tables, processor state and retained randomness. Count allocated words as 32 bytes. Memory has no scalar contribution or tie-break.",
+  "claim_fields": {
+    "time_log2": "log2(T)",
+    "time_unit": "word-operations",
+    "memory_log2_bytes": "log2(max(1,peak_bytes))",
+    "preprocessing_log2": "log2(max(1,preprocessing_operations)); included in T",
+    "success_probability": "supported lower bound >=0.39",
+    "nonuniform_advice_log2_bytes": "log2(max(1,advice_bytes)); included in peak storage"
+  },
+  "candidate_prices_allowed": false,
+  "review": "Require a self-contained correctness/success argument, a complete cost ledger and explicit evidence-linked heuristic assumptions. Review acceptance is not mathematical proof; finite experiments do not establish production complexity.",
+  "hashsmash_reference": "https://github.com/Layr-Labs/hash-smash/blob/c2a8d4c7d7716ca9855375a585e50c09ec55a538/cost-models/collision-frontier-v5.json",
+  "normalization": "Same primitive model and success threshold as the pinned HashSmash contract. Curvesma.sh reports raw word-operation work; no target-compression normalization applies. Scores from the two projects are not directly comparable."
+}
