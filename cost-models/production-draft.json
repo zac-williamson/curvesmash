@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "state": "draft",
+  "metric": "time_log2",
+  "direction": "-",
+  "computation": "expected total charged classical computation for one target",
+  "success_probability_minimum": 0.9,
+  "scope": "single-target cold attack; preprocessing and nonuniform advice charged",
+  "memory": "required reviewed supplementary metric",
+  "candidate_prices_allowed": false,
+  "unresolved": [
+    "Scientific signoff on success/expectation and preprocessing conventions.",
+    "Pin priced word-operation model and arithmetic ledgers; do not substitute security-bit labels.",
+    "Review applicable baseline selection and uncertainty at actual production parameters."
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "state": "draft",
+  "owner": "zac-williamson",
+  "targets": [
+    {
+      "id": "secp256k1-ecdlp",
+      "curve": "secp256k1",
+      "problem": "ecdlp",
+      "scope": "unrestricted-production",
+      "output": "scalar",
+      "acceptance_equation": "[x]P = Q",
+      "challenge_distribution": "x uniform in Z/rZ; Q = [x]P; fixed standard subgroup generator P",
+      "qualified_baseline": null,
+      "sources": [
+        "https://www.secg.org/sec2-v2.pdf"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model."
+      ]
+    },
+    {
+      "id": "p256-ecdlp",
+      "curve": "P-256",
+      "problem": "ecdlp",
+      "scope": "unrestricted-production",
+      "output": "scalar",
+      "acceptance_equation": "[x]P = Q",
+      "challenge_distribution": "x uniform in Z/rZ; Q = [x]P; fixed standard subgroup generator P",
+      "qualified_baseline": null,
+      "sources": [
+        "https://csrc.nist.gov/pubs/sp/800/186/final"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model."
+      ]
+    },
+    {
+      "id": "bn254-invert-g1",
+      "curve": "bn254",
+      "problem": "fixed-generator-pairing-inversion",
+      "scope": "unrestricted-production",
+      "output": "G1 point",
+      "acceptance_equation": "e(P,Q0) = z",
+      "challenge_distribution": "z uniform in GT; fixed nonzero standard generator Q0 in G2",
+      "qualified_baseline": null,
+      "sources": [
+        "https://eips.ethereum.org/EIPS/eip-197"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model.",
+        "Pin exact complete pairing map, generators, field tower and GT encoding; validate independent vectors."
+      ]
+    },
+    {
+      "id": "bn254-invert-g2",
+      "curve": "bn254",
+      "problem": "fixed-generator-pairing-inversion",
+      "scope": "unrestricted-production",
+      "output": "G2 point",
+      "acceptance_equation": "e(P0,Q) = z",
+      "challenge_distribution": "z uniform in GT; fixed nonzero standard generator P0 in G1",
+      "qualified_baseline": null,
+      "sources": [
+        "https://eips.ethereum.org/EIPS/eip-197"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model.",
+        "Pin exact complete pairing map, generators, field tower and GT encoding; validate independent vectors."
+      ]
+    },
+    {
+      "id": "bls12-381-invert-g1",
+      "curve": "bls12-381",
+      "problem": "fixed-generator-pairing-inversion",
+      "scope": "unrestricted-production",
+      "output": "G1 point",
+      "acceptance_equation": "e(P,Q0) = z",
+      "challenge_distribution": "z uniform in GT; fixed nonzero standard generator Q0 in G2",
+      "qualified_baseline": null,
+      "sources": [
+        "https://eips.ethereum.org/EIPS/eip-2537"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model.",
+        "Pin exact complete pairing map, generators, field tower and GT encoding; validate independent vectors."
+      ]
+    },
+    {
+      "id": "bls12-381-invert-g2",
+      "curve": "bls12-381",
+      "problem": "fixed-generator-pairing-inversion",
+      "scope": "unrestricted-production",
+      "output": "G2 point",
+      "acceptance_equation": "e(P0,Q) = z",
+      "challenge_distribution": "z uniform in GT; fixed nonzero standard generator P0 in G1",
+      "qualified_baseline": null,
+      "sources": [
+        "https://eips.ethereum.org/EIPS/eip-2537"
+      ],
+      "unresolved": [
+        "Pin and review full mathematical parameter/encoding/implementation lock.",
+        "Author and qualify baseline under the approved cost model.",
+        "Pin exact complete pairing map, generators, field tower and GT encoding; validate independent vectors."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "name": "curvesmash",
+  "tracks": [
+    {
+      "name": "secp256k1-ecdlp-exploratory",
+      "description": "secp256k1: [x]P = Q; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/secp256k1-ecdlp"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "secp256k1-ecdlp-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/secp256k1-ecdlp-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    },
+    {
+      "name": "p256-ecdlp-exploratory",
+      "description": "P-256: [x]P = Q; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/p256-ecdlp"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "p256-ecdlp-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/p256-ecdlp-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    },
+    {
+      "name": "bn254-invert-g1-exploratory",
+      "description": "bn254: e(P,Q0) = z; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/bn254-invert-g1"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "bn254-invert-g1-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/bn254-invert-g1-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    },
+    {
+      "name": "bn254-invert-g2-exploratory",
+      "description": "bn254: e(P0,Q) = z; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/bn254-invert-g2"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "bn254-invert-g2-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/bn254-invert-g2-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    },
+    {
+      "name": "bls12-381-invert-g1-exploratory",
+      "description": "bls12-381: e(P,Q0) = z; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/bls12-381-invert-g1"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "bls12-381-invert-g1-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/bls12-381-invert-g1-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    },
+    {
+      "name": "bls12-381-invert-g2-exploratory",
+      "description": "bls12-381: e(P0,Q) = z; unrestricted production target. Minimize log2 total classical computation. Prelaunch draft: no qualified baseline or scoring.",
+      "category": "cryptanalysis",
+      "direction": "-",
+      "promotionMode": "manual",
+      "editablePaths": [
+        "candidates/bls12-381-invert-g2"
+      ],
+      "setupCommand": [
+        "bash",
+        ".yukon/setup.sh"
+      ],
+      "benchmarkCommand": [
+        "python3",
+        "scripts/prelaunch.py",
+        "--track",
+        "bls12-381-invert-g2-exploratory",
+        "--require-ready"
+      ],
+      "scorePath": ".yukon/scores/bls12-381-invert-g2-exploratory.json",
+      "maxSubmissionBytes": 4194304
+    }
+  ]
+}
