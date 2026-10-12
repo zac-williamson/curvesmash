@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "target_profile": "production-v1",
+  "target_id": "bls12-381-invert-g1",
+  "cost_model": "classical-word-ram-v1",
+  "target_profile_sha256": "f3344121b88073ed388ddc6dbbfb69fcb4c39c2419e7c5066bf154b1dc37c52d",
+  "cost_model_sha256": "1c8ee1349dcdf670b144a978f30c1513eeb9246ad736c93b150c456eecd1a886",
+  "submission_state": "ready",
+  "review_status": "pending",
+  "baseline_kind": "generic-accounting-control",
+  "algorithm": "deterministic-bsgs-v1",
+  "proof": "proof.md",
+  "resource_ledger": "ledger.json",
+  "claim": {
+    "time_log2": 153.944862,
+    "time_unit": "word-operations",
+    "work_budget_word_operations": "21979654158751268992716079407673789446864580848",
+    "memory_log2_bytes": 137.643857,
+    "preprocessing_log2": 152.456114,
+    "success_probability": 1,
+    "nonuniform_advice_log2_bytes": 0
+  },
+  "heuristics": [],
+  "limitations": [
+    "Analytic construction; no full-size execution or independent qualification.",
+    "Conservative generic control, not a best-known attack estimate or security bound.",
+    "The declared exponential memory is required; beating this control alone does not establish novel cryptanalysis."
+  ]
+}

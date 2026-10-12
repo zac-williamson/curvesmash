@@ -1,7 +1,11 @@
 # secp256k1-ecdlp
 
-Submission directory. No baseline is qualified yet.
+Deterministic baby-step/giant-step baseline package, ready for independent review.
+Success probability: 1 on the specified target. Qualification remains pending.
 
-Target: secp256k1; [x]P = Q. Scope: unrestricted production.
+- [Proof and complete accounting](proof.md)
+- [Exact resource ledger](ledger.json)
+- [Claim bound to target/cost definitions](claim.json)
 
-Provide an algorithm, correctness/success argument, computation and memory costs, assumptions, citations, and supporting evidence. Organizer review determines acceptance and the score.
+This is a conservative generic accounting control, not a best-known attack estimate.
+No full-size execution, accepted score or cryptanalytic advance is claimed.

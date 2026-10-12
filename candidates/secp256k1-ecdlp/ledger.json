@@ -1,0 +1,50 @@
+{
+  "method": "deterministic-bsgs-v1",
+  "kind": "analytic-upper-bound",
+  "parameters": {
+    "field_bits": 256,
+    "field_words": 1,
+    "order_bits": 256,
+    "split_bits": 128,
+    "baby_steps": "340282366920938463463374607431768211456",
+    "giant_steps": "340282366920938463463374607431768211455",
+    "key_words": 3,
+    "record_words": 4
+  },
+  "kernel_word_operation_bounds": {
+    "modular_add_or_subtract": 256,
+    "base_field_multiply": 147712,
+    "base_field_inverse": 75661568,
+    "affine_point_operation": 78037248,
+    "fp12_multiply": 21384192,
+    "compare_key": 112,
+    "move_record": 128,
+    "binary_search": 23088,
+    "reference_pairing": null
+  },
+  "work": {
+    "setup": "16777216",
+    "baby_table": "26554743013579237146153626469005290262239379456",
+    "merge_sort": "21603846911076541168362727076628100209442816",
+    "giant_search": "26562555896723741893274745549991923660296348880",
+    "verification_and_output": "79926919168",
+    "preprocessing": "26576346860490313687321989196081918362465599488",
+    "total": "53138902757214055580596734746073842102688867536"
+  },
+  "peak_memory_bytes": "87112285931760246646623899502532663181312",
+  "advice_bytes": 0,
+  "success_probability": 1,
+  "formulas": {
+    "A": "128*(s+1)",
+    "M": "k*(2*A+64)+128*(s+1)",
+    "I": "2*k*(M+64)+128*(s+1)",
+    "C": "I+16*M+32*A+4096",
+    "E": "144*M+188*A+65536",
+    "compare": "16*K+64",
+    "move": "16*W+64",
+    "sort": "m*L*(compare+2*move+128)+4096*L",
+    "lookup": "(L+1)*(compare+64)+move+256",
+    "pairing": "(128*512+48*k)*E+2^26",
+    "memory": "2*m*W*32+2^20"
+  }
+}

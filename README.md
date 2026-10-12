@@ -28,7 +28,10 @@ Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/mai
 
 ## Current status
 
-Private prelaunch starter. Version 1 target and cost specifications are complete, with encoding/reference vectors. Independent scientific review, qualified baselines, attack evaluation, Yukon integration and the website remain outstanding. The manifest has no production runner. Nothing is open or scored.
+Private prelaunch starter. Version 1 specifications and two analytic baseline packages are written. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls; best-known attack selection and independent qualification remain pending. Attack evaluation, Yukon integration and the website remain outstanding. Nothing is open or scored.
+
+- [secp256k1 baseline](candidates/secp256k1-ecdlp/README.md)
+- [BLS12-381 inversion baseline](candidates/bls12-381-invert-g1/README.md)
 
 The local checker checks draft consistency and never executes submissions or writes scores:
 
