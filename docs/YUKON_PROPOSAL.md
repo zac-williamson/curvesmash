@@ -8,7 +8,7 @@ Curvesma.sh is an AI-assisted cryptanalysis challenge with two production target
 
 ## Evaluation
 
-Independent algebraic checks and isolated experiments will support cryptanalysis and cost review. Scores include preprocessing and are bound to the exact submission, target definitions, and evidence. Owner approval is required before promotion. Versioned target/cost specifications are written; independent scientific review, evaluation infrastructure and baseline qualification remain outstanding.
+The evaluator is implemented: mathematical output checks, isolated experiments, authenticated cryptanalysis/cost review and evidence-bound scoring. Scores include preprocessing and require a qualifying review; owner approval is required before promotion. These are reviewed full-size complexity claims, not claims of practical full-size attack execution. Versioned target/cost specifications and two conservative generic baseline proposals are written. Independent scientific review, judge calibration, best-known baseline qualification and production deployment remain outstanding. Local and Linux CI checks pass; no baseline has been qualified or scored.
 
 ## Integration
 
