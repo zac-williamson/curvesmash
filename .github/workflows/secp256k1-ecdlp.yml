@@ -1,6 +1,12 @@
 name: secp256k1-ecdlp
 on:
   workflow_dispatch:
+    inputs:
+      review_run_id:
+        description: 'Optional completed review run to reuse; exact evidence/signatures must match'
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: read
   actions: read
@@ -12,6 +18,7 @@ jobs:
     uses: ./.github/workflows/qualification.yml
     with:
       track: secp256k1-ecdlp
+      review_run_id: ${{ inputs.review_run_id }}
     secrets:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       CURVESMASH_REVIEW_SIGNING_KEYS: ${{ secrets.CURVESMASH_REVIEW_SIGNING_KEYS }}

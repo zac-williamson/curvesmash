@@ -202,10 +202,16 @@ def score_job(root, track, work, reviews_dir, output, destination=None):
     # Approval is protected organizer data, never participant-supplied or an AI verdict.
     approval_file = root / "evaluation/definitions-approval.json"
     approval = read_json(approval_file) if approval_file.exists() else None
+    public_receipt = os.environ.get("CURVESMASH_DEFINITION_APPROVAL")
+    if public_receipt:
+        supplied = parse(public_receipt)
+        require(approval is None or supplied == approval, "Conflicting organizer approvals")
+        approval = supplied  # aggregate authenticates the signature and exact definition binding.
     dossier = aggregate(record, reviews, challenges, approval, experiment)
     write_new(output / "dossier.json", dossier)
     write_new(output / "qualification.json", {"binding": record["binding"], "outcome": dossier["outcome"],
         "infrastructure_errors": status["errors"], "definition_binding": definitions_binding(record["evidence"]),
+        "review_run_id": os.environ.get("CURVESMASH_REVIEW_RUN_ID", os.environ.get("GITHUB_RUN_ID", "local")),
         "provenance": read_json(work / "provenance.json"), "dossier_sha256": digest(dossier)})
     print(dossier["outcome"]+": "+str(len(dossier["blockers"]))+" outstanding gates.")
     if status["errors"]:

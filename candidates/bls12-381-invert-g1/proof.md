@@ -69,25 +69,11 @@ coefficient copying, addressing and loop control. Addition in Fp12 also costs
 less than E. Binary powering of a d-bit exponent takes at most 2*d
 multiplications and at most 64*d control operations.
 
-The paired reference Miller loop has 63 bit iterations and at most one
-extra addition per iteration. Charge 128 substeps of 512 Fp12-sized
-arithmetic operations each: the projective point, line, twist and accumulator
-formulas fit this allowance without inversion inside the loop. Per substep,
-allow 64 Fp2 operations for point arithmetic, 64 Fp12 operations for the
-line, 64 base/Fp2 operations for twisting, 16 Fp12 accumulator operations,
-and 65536 word operations for coefficient movement and control. Fp2
-multiplication needs at most four M calls and four A calls, below E;
-all other listed Fp2 operations also fit E. The control allowance is below E,
-so this subtotal is below 512*E. Replace its
-single Fp12 quotient inversion with powering by p^12-2. Charge a further
-24*k products for that inversion and 24*k for final exponentiation.
-The 2^26 allowance covers exponent construction, decoding and control.
-Compute p^12 with 12 bit-serial integer products (at most 381 bits in the
-multiplier, 18 limbs in the accumulator) and divide by r using at most
-4572 shift/subtract stages. Even allowing 128 operations per limb pass,
-the products and division fit this allowance.
-Thus J=(128*512+48*k)*E+2^26 bounds one complete pinned pairing.
-This describes a word-RAM implementation of that map, not Python wall time.
+The complete projective point, line-evaluation and twist formulas, their
+operation counts, the exact Miller schedule, wrapper and final-power
+lowering are in `pairing-kernels.md`. That appendix derives the unchanged
+J=(128*512+48*k)*E+2^26 bound for the pinned map. It supplies all needed
+formulas inside this frozen package; no external lookup is needed.
 
 Setup is J+2*b*E+2^24: compute g, invert g^m by exponent r-1, and decode.
 Verification/output is J+8*b*C+4*b*E+2^24, allowing the final pairing,

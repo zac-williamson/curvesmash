@@ -53,9 +53,8 @@ class Workflow(unittest.TestCase):
     def test_separated_stages_emit_exact_yukon_path_and_numeric_score(self):
         self.initialize()
         self.assertEqual(self.run_reviews(), 0)
-        common.write_new(self.root / 'evaluation/definitions-approval.json', self.approval())
         destination = Path(self.temp.name).resolve() / 'yukon-score'
-        with patch.dict(os.environ, {}, clear=True):
+        with patch.dict(os.environ, {'CURVESMASH_DEFINITION_APPROVAL': json.dumps(self.approval())}, clear=True):
             self.assertEqual(workflow.score_job(self.root, TRACK, self.work, self.output, self.result, destination), 0)
         staged = common.read_json(destination / '.yukon/scores' / (TRACK+'.json'))
         self.assertEqual(staged['score'], staged['timeLog2'])
