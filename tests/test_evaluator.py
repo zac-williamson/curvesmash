@@ -351,6 +351,8 @@ class Evaluation(unittest.TestCase):
         records=self.resign(self.signed_reviews(), 'evaluability',
             lambda b:b['obligations'][0].update(status='unresolved'))
         self.assertEqual(self.dossier(records)['outcome'],'not_evaluable')
+        not_applicable=self.resign(self.signed_reviews(),'evaluability',lambda b:b['obligations'][0].update(status='not_applicable'))
+        self.assertEqual(self.dossier(not_applicable)['outcome'],'not_evaluable')
         with self.assertRaises(ValueError):review.score(self.record,self.dossier(records))
 
     def test_analysis_counts_are_bounded_and_do_not_assert_attack_success(self):

@@ -248,7 +248,7 @@ def aggregate(record, reviews, challenges=(), definition_approval=None, experime
     for key in set(findings)-resolved:
         blockers.append("Fatal finding awaits defense/adjudication: "+key[1])
     evaluability_gaps = [id for (role, id), status in obligations.items()
-                        if role == "evaluability" and status not in ("supported", "not_applicable")]
+                        if role == "evaluability" and status != "supported"]
     unsupported = [role+"/"+h["id"] for role, body in bodies.items()
                    for h in body["heuristics"] if h["status"] == "unsupported"]
     # Keep uncertainties visible without requiring the rigorous lane's discharge gate.
