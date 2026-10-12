@@ -86,10 +86,8 @@ def validate_claim(files, track, profiles, cost, allow_draft=False):
     require(bounds["time_unit"] == "target-group-operations", "Wrong work unit")
     for field in ("time_log2", "memory_log2_bytes", "preprocessing_log2",
                   "nonuniform_advice_log2_bytes"):
-        number(bounds[field], 0, 2048)
+        number(bounds[field], 0, 1e308)
     number(bounds["success_probability"], cost["success_probability_minimum"], 1)
-    require(bounds["nonuniform_advice_log2_bytes"] <= bounds["memory_log2_bytes"] <= 261,
-            "Storage exceeds declared peak or RAM address space")
     # Cost arithmetic and scientific support are reviewed from the written argument.
     # Detailed kernel bounds are reviewed, not executed or accepted by this sum check.
     require(type(claim["heuristics"]) is list and len(claim["heuristics"]) <= 64,

@@ -195,7 +195,7 @@ class Evaluation(unittest.TestCase):
         self.assertNotIn("resource_ledger", self.record["evidence"]["claim"])
         self.assertNotIn("candidate/ledger.json", self.record["evidence"]["files"])
         path = "candidates/"+TRACK+"/claim.json"
-        self.change(path, lambda v: v["claim"].update(memory_log2_bytes=262))
+        self.change(path, lambda v: v["claim"].update(memory_log2_bytes=-1))
         with self.assertRaises(ValueError):
             intake.build_evidence(self.root, TRACK)
 

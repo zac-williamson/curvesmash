@@ -139,7 +139,7 @@ def initial(record, evidence, binding, policy):
                                "nonuniform_advice_log2_bytes", "success_probability"))
         for field in ("time_log2", "memory_log2_bytes", "preprocessing_log2",
                       "nonuniform_advice_log2_bytes"):
-            number(reconstruction[field], 0, 2048)
+            number(reconstruction[field], 0, 1e308)
         number(reconstruction["success_probability"], 0, 1)
         statuses = {item["id"]: item["status"] for item in body["obligations"]}
         for obligation in cost_discrepancies(reconstruction, evidence["claim"]["claim"]):

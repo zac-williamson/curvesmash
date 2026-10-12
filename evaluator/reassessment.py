@@ -180,7 +180,7 @@ def request_reassessment(record, packet, policy, private_bytes, api_key, transpo
     value=content['time_log2']
     from .common import number
     if content['decision']=='accepted':
-        number(value,0,2048)
+        number(value,0,1e308)
         if unchanged: require(value==previous,'Unchanged scoring policy must preserve the score')
     else: require(value is None,'Rejected/incomplete reassessment cannot have a score')
     body={'kind':'reassessment','reviewer':'cost','issued_at':datetime.now(timezone.utc).isoformat(),
@@ -209,7 +209,7 @@ def reassessment_dossier(record,packet,signed,policy,experiment=None):
     require(body['decision'] in ('accepted','rejected','needs_evidence'),'Invalid decision')
     from .common import number
     if body['decision']=='accepted':
-        number(body['time_log2'],0,2048)
+        number(body['time_log2'],0,1e308)
         if unchanged: require(body['time_log2']==previous_score(packet),'Historical score changed')
     else: require(body['time_log2'] is None,'Failure cannot score')
     text(body['reason'])

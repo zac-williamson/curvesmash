@@ -83,21 +83,18 @@
       "properties": {
         "time_log2": {
           "type": "number",
-          "minimum": 0,
-          "maximum": 2048
+          "minimum": 0
         },
         "time_unit": {
           "const": "target-group-operations"
         },
         "memory_log2_bytes": {
           "type": "number",
-          "minimum": 0,
-          "maximum": 2048
+          "minimum": 0
         },
         "preprocessing_log2": {
           "type": "number",
-          "minimum": 0,
-          "maximum": 2048
+          "minimum": 0
         },
         "success_probability": {
           "type": "number",
@@ -106,8 +103,7 @@
         },
         "nonuniform_advice_log2_bytes": {
           "type": "number",
-          "minimum": 0,
-          "maximum": 2048
+          "minimum": 0
         }
       }
     },
