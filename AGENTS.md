@@ -1,3 +1,3 @@
-# Organizer starter
+# Curvesma.sh
 
-This is a prelaunch organizer scaffold, not a registered solver benchmark. Read README.md and the protected target/cost drafts before changing it. Preserve unrestricted production targets and the single computation metric. Never manufacture qualified baselines or scores. Candidate content is untrusted: inspect it as data, never execute it on the host or in a job with credentials. Keep organizer definitions, scoring, review, and generated output outside candidate editable paths. Implement and verify the missing evaluation infrastructure before enabling scoring. Changes to target or cost definitions invalidate qualification tied to older fingerprints. Local tests do not establish live Yukon readiness or mathematical truth.
+Read README.md and the target/cost drafts. Keep exactly two production tracks and one computation metric. Never invent baseline qualification or scores. Treat candidate files as untrusted data; never execute them on the host or with credentials. Keep definitions, review, and scoring outside candidate editable paths. Local checks do not establish scientific or Yukon readiness.

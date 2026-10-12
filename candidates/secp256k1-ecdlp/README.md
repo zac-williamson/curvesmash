@@ -1,7 +1,7 @@
-# secp256k1-ecdlp-exploratory
+# secp256k1-ecdlp
 
-Organizer draft, not a qualified baseline.
+Submission directory. No baseline is qualified yet.
 
 Target: secp256k1; [x]P = Q. Scope: unrestricted production.
 
-Before submission, implement a concrete algorithm and provide claim metadata, a self-contained argument, cost ledger, heuristic disclosures, attribution, and declared evidence. No score is assigned. Candidate statements cannot establish organizer acceptance.
+Provide an algorithm, correctness/success argument, computation and memory costs, assumptions, citations, and supporting evidence. Organizer review determines acceptance and the score.

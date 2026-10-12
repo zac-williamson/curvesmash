@@ -34,7 +34,8 @@ class DraftGates(unittest.TestCase):
 
     def test_draft_is_consistent_but_not_ready(self):
         manifest, profiles, cost = prelaunch.validate(self.root)
-        self.assertEqual(len(manifest["tracks"]), 6)
+        self.assertEqual({t["name"] for t in manifest["tracks"]},
+                         {"secp256k1-ecdlp", "bls12-381-invert-g1"})
         self.assertTrue(prelaunch.readiness_errors(profiles, cost))
         # Removing outstanding prose cannot enable a nonexistent evaluation pipeline.
         profiles["targets"] = []
@@ -44,6 +45,16 @@ class DraftGates(unittest.TestCase):
     def test_protected_paths_are_not_candidate_editable(self):
         self.change("benchmark.json", lambda v: v["tracks"][0].update(
             editablePaths=["target-profiles"]))
+        self.reject()
+
+    def test_extra_track_rejected(self):
+        self.change("benchmark.json", lambda v: v["tracks"].append(
+            dict(v["tracks"][0], name="p256-ecdlp")))
+        self.reject()
+
+    def test_target_substitution_rejected(self):
+        self.change("target-profiles/production-draft.json", lambda v:
+                    v["targets"][0].update(id="p256-ecdlp"))
         self.reject()
 
     def test_automatic_promotion_rejected(self):

@@ -1,19 +1,17 @@
-# Draft for https://www.yukon.org/create
+# Yukon proposal
 
-Not submitted. Name, email, and affiliation must be supplied by the organizer.
+Draft for [Yukon's challenge form](https://www.yukon.org/create). Not submitted. Organizer contact details still need to be supplied.
 
-## The Problem
+## Problem
 
-Curvesmash (curvesma.sh) is an open AI-assisted cryptanalysis challenge for elliptic-curve discrete logarithms and fixed-argument cryptographic pairing inversion. Its six proposed tracks use unrestricted production parameters: secp256k1 and P-256 ECDLP; inversion into G1 and G2 for Ethereum BN254 and BLS12-381. Each track minimizes log2 expected total classical computation for a single target at a fixed success requirement. Memory, preprocessing, heuristic assumptions, and evidence are public supplementary metrics. Small and restricted instances are supporting experiments, not production leaderboard targets. The aim is to identify defensible reductions in attack cost against common hardness assumptions.
+Curvesma.sh is an AI-assisted cryptanalysis challenge with two production targets: secp256k1 discrete logarithms and BLS12-381 pairing inversion into G1 with a fixed G2 generator. Both minimize log₂ expected total classical attack computation under a fixed success and cost contract. Submissions must support their full-size complexity claims; smaller experiments supply evidence.
 
-## The Verifier
+## Evaluation
 
-We propose deterministic intake and independent point/pairing checks, followed by scoped experiments in an isolated credential-free executor and cryptanalytic review of full-size resource and success claims. Accepted scores are derived from a protected, versioned cost model, bound to the exact package, parameters, evidence, and review configuration. Executed results and extrapolated cost claims remain distinct. AI screening and expert acceptance are recorded separately, and promotion requires owner review. Full-size attacks need not be executed when infeasible; their complexity arguments and assumptions must be supported. This infrastructure is currently a prelaunch scaffold, not a completed verifier.
+Independent algebraic checks and isolated experiments support cryptanalysis and cost review. Scores include preprocessing and are bound to the exact submission, target definitions, and evidence. Owner approval is required before promotion. The evaluation system and reviewed baselines remain to be implemented.
 
-## Yukon integration request
+## Integration
 
-We would like to confirm the current production owner/import workflow for a schema-v2 multi-track repository, closed baseline qualification and manual promotion, review-provider integration, research Discussions, and whether a branded challenge page/domain can use the same published result infrastructure as HashSmash.
+Please confirm the production registration workflow, repository App access, review-provider setup, and hosting a branded results page at curvesma.sh. Integration will begin with submissions closed.
 
-## Link
-
-[zac-williamson/curvesmash](https://github.com/zac-williamson/curvesmash) — a private prelaunch starter. Yukon will need explicit repository access before reviewing it. The verifier and scientific qualifications remain to be implemented.
+Repository: [zac-williamson/curvesmash](https://github.com/zac-williamson/curvesmash), currently private.

@@ -1,7 +1,7 @@
-# bls12-381-invert-g1-exploratory
+# bls12-381-invert-g1
 
-Organizer draft, not a qualified baseline.
+Submission directory. No baseline is qualified yet.
 
-Target: bls12-381; e(P,Q0) = z. Scope: unrestricted production.
+Target: BLS12-381; recover P in G1 with e(P,Q0) = z for a fixed G2 generator Q0. Scope: unrestricted production.
 
-Before submission, implement a concrete algorithm and provide claim metadata, a self-contained argument, cost ledger, heuristic disclosures, attribution, and declared evidence. No score is assigned. Candidate statements cannot establish organizer acceptance.
+Provide an algorithm, correctness/success argument, computation and memory costs, assumptions, citations, and supporting evidence. Organizer review determines acceptance and the score.
