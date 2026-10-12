@@ -1,22 +1,20 @@
 {
-  "schema_version": 1,
-  "target_profile": "production-v1",
+  "schema_version": 2,
+  "target_profile": "production-v2",
   "target_id": "secp256k1-ecdlp",
-  "cost_model": "classical-word-ram-v1",
-  "target_profile_sha256": "f3344121b88073ed388ddc6dbbfb69fcb4c39c2419e7c5066bf154b1dc37c52d",
-  "cost_model_sha256": "1c8ee1349dcdf670b144a978f30c1513eeb9246ad736c93b150c456eecd1a886",
+  "cost_model": "classical-group-work-v2",
+  "target_profile_sha256": "e4db9d7804258c184139beb4a740d751b7f298e1fbbb62b98947f6542aad2043",
+  "cost_model_sha256": "28e49e2edbc41fa4dfa6c05fa1a66cfeb8b28579a5b59af88d9bf672b7dcd987",
   "submission_state": "ready",
   "review_status": "pending",
   "baseline_kind": "generic-accounting-control",
   "algorithm": "deterministic-bsgs-v1",
   "proof": "proof.md",
-  "resource_ledger": "ledger.json",
   "claim": {
-    "time_log2": 155.218461,
-    "time_unit": "word-operations",
-    "work_budget_word_operations": "53138902757214055580596734746073842102688867536",
+    "time_log2": 129.000802,
+    "time_unit": "target-group-operations",
     "memory_log2_bytes": 136.000001,
-    "preprocessing_log2": 154.218836,
+    "preprocessing_log2": 128.001176,
     "success_probability": 1,
     "nonuniform_advice_log2_bytes": 0
   },
@@ -25,5 +23,6 @@
     "Analytic construction; no full-size execution or independent qualification.",
     "Conservative generic control, not a best-known attack estimate or security bound.",
     "The declared exponential memory is required; beating this control alone does not establish novel cryptanalysis."
-  ]
+  ],
+  "lane": "exploratory"
 }

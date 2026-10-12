@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "id": "production-v2",
+  "state": "specified",
+  "scientific_review": "pending",
+  "owner": "zac-williamson",
+  "cost_model": "classical-group-work-v2",
+  "targets": [
+    {
+      "id": "secp256k1-ecdlp",
+      "version": 1,
+      "curve": "secp256k1",
+      "problem": "ecdlp",
+      "scope": "unrestricted-production",
+      "field_modulus": "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f",
+      "subgroup_order": "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+      "curve_equation": "y^2 = x^3 + 7 over Fp",
+      "cofactor": 1,
+      "generator_P": {
+        "x": "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "y": "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+      },
+      "challenge": "Sample x uniformly from 0..r-1 by rejection sampling; give only Q=[x]P. The scalar and sampling coins stay private.",
+      "input": {
+        "Q": "secp256k1 point"
+      },
+      "output": {
+        "x": "32-byte scalar"
+      },
+      "acceptance": "Decode Q canonically, require Q in <P>; decode 0<=x<r; accept exactly when [x]P=Q.",
+      "encoding": "UTF-8 JSON with exactly the stated keys. Scalar: 64 lowercase hex characters, no prefix. Point: null for infinity, otherwise {x,y}, each 64 lowercase hex characters representing a big-endian integer less than p. Reject duplicate keys, noncanonical values and off-curve points.",
+      "qualified_baseline": null,
+      "source": "https://www.secg.org/sec2-v2.pdf#page=13"
+    },
+    {
+      "id": "bls12-381-invert-g1",
+      "version": 1,
+      "curve": "BLS12-381",
+      "parameter_x": "-d201000000010000",
+      "problem": "fixed-generator-pairing-inversion",
+      "scope": "unrestricted-production",
+      "field_modulus": "1a0111ea397fe69a4b1ba7b6434bacd764774b84f38512bf6730d2a0f6b0f6241eabfffeb153ffffb9feffffffffaaab",
+      "subgroup_order": "73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001",
+      "curve_equation_G1": "y^2 = x^3 + 4 over Fp; G1=<P0> of order r",
+      "cofactor_G1": "396c8c005555e1568c00aaab0000aaab",
+      "generator_P0": {
+        "x": "17f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb",
+        "y": "08b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1"
+      },
+      "field_Fp2": "Fp[u]/(u^2+1); [c0,c1] means c0+c1*u",
+      "curve_equation_G2": "y^2 = x^3 + 4*(1+u) over Fp2; G2=<Q0> of order r",
+      "generator_Q0": {
+        "x": [
+          "024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8",
+          "13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e"
+        ],
+        "y": [
+          "0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801",
+          "0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be"
+        ]
+      },
+      "field_Fp12": "Fp[w]/(w^12-2*w^6+2); coefficient list [c0,...,c11] means sum(ci*w^i); u maps to w^6-1",
+      "group_GT": "Nonzero z in Fp12 with z^r=1; identity [1,0,...,0]",
+      "pairing": {
+        "definition": "e(P,Q)=py_ecc.optimized_bls12_381.pairing(Q,P,final_exponentiate=True) at the pinned commit. Argument order is reversed in the library. Raw Miller output is not the target.",
+        "ate_loop_count": "d201000000010000",
+        "final_exponent": "(p^12-1)/r",
+        "reference": {
+          "repository": "https://github.com/ethereum/py_ecc",
+          "release": "v8.0.0",
+          "commit": "04151f01f59f902ab932a51e0ca0ebce3883fc51",
+          "source_sha256": {
+            "py_ecc/optimized_bls12_381/optimized_curve.py": "f66da497e4efa555ce4b4364a06a154ff2038ed6c227b702b109fba298c1ad8e",
+            "py_ecc/optimized_bls12_381/optimized_pairing.py": "0763415a7de64375dccfa62156d06505923ac6f8f3e1abab87126018d95abef9",
+            "py_ecc/fields/field_properties.py": "9636251929dc93b9b9ae93b8aa0f91e14ed829248a0858b0fa881d5ff9105830",
+            "py_ecc/fields/optimized_field_elements.py": "070159688a16c1346a31500f4f1a9d031cb7ce60c8fa1847ab3c534302a22c73"
+          }
+        }
+      },
+      "challenge": "Sample a uniformly from 0..r-1 by rejection sampling; give only z=e(P0,Q0)^a. Neither a nor [a]P0 nor sampling coins are given. This samples uniform GT, including identity.",
+      "input": {
+        "z": "GT coefficient list"
+      },
+      "output": {
+        "P": "BLS12-381 G1 point"
+      },
+      "acceptance": "Decode z canonically; require z!=0 and z^r=1. Decode P canonically, require P on G1 curve and [r]P=infinity. Accept exactly when e(P,Q0)=z, comparing all 12 coefficients. Infinity is valid exactly for z=1.",
+      "encoding": "UTF-8 JSON with exactly the stated keys. Each Fp coefficient: 96 lowercase hex characters, no prefix, big-endian integer less than p. GT: exactly 12 coefficients in increasing polynomial degree. Point: null for infinity, otherwise {x,y} with Fp coefficients. Reject duplicate keys, noncanonical values, off-curve and wrong-subgroup points.",
+      "qualified_baseline": null,
+      "source": "https://github.com/ethereum/py_ecc/tree/04151f01f59f902ab932a51e0ca0ebce3883fc51/py_ecc/optimized_bls12_381"
+    }
+  ]
+}

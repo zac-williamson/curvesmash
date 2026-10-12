@@ -1,45 +1,25 @@
 # curvesma.sh
 
-AI-assisted research into elliptic-curve discrete logarithms and pairing inversion, built for Yukon. Owner: [zac-williamson](https://github.com/zac-williamson).
+AI-assisted cryptanalysis of **secp256k1 discrete logarithms** and **BLS12-381 pairing inversion**, built for Yukon.
 
-## Two tracks
-
-| Track | Challenge | Required output |
+| Track | Challenge | Answer |
 | --- | --- | --- |
-| `secp256k1-ecdlp` | Fixed generator P; Q = [x]P for uniform x in Z/rZ | x such that [x]P = Q |
-| `bls12-381-invert-g1` | Fixed G2 generator Q0; uniform z in GT | P in G1 such that e(P,Q0) = z |
+| `secp256k1-ecdlp` | Given Q=[x]P, for uniform x and fixed standard P | Recover x |
+| `bls12-381-invert-g1` | Given uniform z in GT and fixed standard G2 point Q0 | Find P in G1 with e(P,Q0)=z |
 
-Both use full production parameters. Exact parameters, encodings and the pinned pairing convention are in [production-v1](target-profiles/production-v1.json). Small or restricted instances provide supporting evidence only.
+Both use full production parameters. There are exactly two tracks and one metric: **log2(total computation in target-group-operation equivalents), lower is better**. Success must be at least 39%. Preprocessing and failed attempts count; memory is reported separately. Explain the calculation in the written argument. No structured cost ledger is required. See the [cost rules](docs/COST_MODEL.md).
 
-## One metric
+Both tracks follow HashSmash's exploratory standard: a concrete, supported claim can score when no fatal flaw survives defense/adjudication. Uncertainty remains in the published review. Acceptance means `plausible_not_refuted`, not proof or a practical break. See the [review rules](docs/EVALUATION.md).
 
-**log₂ total classical attack work budget; lower is better.** The algorithm must return a valid result within that budget with probability at least 39% over uniform challenges and fresh algorithm randomness. Charge preprocessing, failed trials, verification and amplification. Publish memory costs and assumptions alongside the score.
+**Participants start at [TASK.md](TASK.md).** It covers the editable surface, local checks, advisory review, experiments and Yukon submissions. Read the [participation terms](docs/legal/TERMS_OF_SERVICE.md) and [privacy notice](docs/legal/PRIVACY_POLICY.md).
 
-The [cost model](cost-models/classical-word-ram-v1.json) uses HashSmash's 256-bit word-RAM primitives and success threshold. Each primitive costs one word-operation; higher arithmetic must supply a complete implementation ledger. Scores represent reviewed full-size complexity claims; experiments are separate evidence. Independent scientific review is pending.
+The repository is public. Version 2 replaces the original stricter review policy and mandatory ledger with HashSmash-style exploratory review and prose accounting. The version 1 scores remain [historical records](docs/archive/BASELINE_QUALIFICATION_V1.md); they cannot be relabeled in the new units. Fresh version 2 qualification is in progress. The standard baby-step/giant-step candidates are conservative accounting controls, not best-known attack estimates. Yukon import is pending; submissions are not open.
 
-## Build sequence
-
-1. Review the versioned target/cost specifications and qualify a fully accounted baseline for each track. A generic control is eligible; label it honestly and keep best-known attack comparisons separate.
-2. Implement independent mathematical checks, isolated experiments, and cryptanalysis/cost review. Bind each score to its submission, definitions, and evidence; require manual promotion.
-3. Register with Yukon while submissions remain closed, then verify baseline runs and the review/promotion lifecycle.
-4. Connect curvesma.sh to a two-row results page with baseline cost, best accepted cost, and evidence links.
-
-Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/main/docs/BUILDER_GUIDE.md) as the evaluation reference. The [Yukon proposal](docs/YUKON_PROPOSAL.md) is drafted and has not been submitted.
-
-## Current status
-
-Private prelaunch project. Both deterministic baby-step/giant-step baselines passed the live AI reviews and emitted verified scores on October 12, 2026, after organizer approval of the scoring rules. The secp256k1 score is **155.218461**; BLS12-381 inversion is **153.944862**. These are conservative accounting controls with success probability 1, not best-known attack estimates or practical breaks. See the [qualification record](docs/BASELINE_QUALIFICATION.md) for the exact release, runs and evidence. Independent human cryptanalytic validation, judge calibration, Yukon import and the website remain outstanding. Submissions remain closed.
-
-- [secp256k1 baseline](candidates/secp256k1-ecdlp/README.md)
-- [BLS12-381 inversion baseline](candidates/bls12-381-invert-g1/README.md)
-
-Install the hash-locked organizer environment, then run the checks:
+Organizers: [execution and access](docs/EXECUTION.md), [reassessment and history](docs/RESCORING.md), [Yukon proposal](docs/YUKON_PROPOSAL.md).
 
 ```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements.lock
 bash .yukon/setup.sh
+.venv/bin/python scripts/local_tracks.py check secp256k1-ecdlp
+.venv/bin/python scripts/local_tracks.py check bls12-381-invert-g1
 .venv/bin/python -m unittest discover -s tests -v
 ```
-
-The manifest binds each track to its separated GitHub Actions workflow. See [EXECUTION.md](docs/EXECUTION.md) for the pinned release, credentials and artifact contract. Scores remain gated on actual qualification. Passing local checks establishes neither scientific qualification nor Yukon readiness. See [EVALUATION.md](docs/EVALUATION.md) for the complete review and scoring protocol.

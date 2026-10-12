@@ -49,7 +49,7 @@ class DraftGates(unittest.TestCase):
         self.reject()
 
     def test_target_substitution_rejected(self):
-        self.change("target-profiles/production-v1.json", lambda v:
+        self.change("target-profiles/production-v2.json", lambda v:
                     v["targets"][0].update(id="p256-ecdlp"))
         self.reject()
 
@@ -64,31 +64,31 @@ class DraftGates(unittest.TestCase):
         self.reject()
 
     def test_changed_metric_rejected(self):
-        self.change("cost-models/classical-word-ram-v1.json", lambda v: v.update(
+        self.change("cost-models/classical-group-work-v2.json", lambda v: v.update(
             metric="largest_toy_curve"))
         self.reject()
 
     def test_changed_success_requirement_rejected(self):
-        self.change("cost-models/classical-word-ram-v1.json", lambda v: v.update(
+        self.change("cost-models/classical-group-work-v2.json", lambda v: v.update(
             success_probability_minimum=0.01))
         self.reject()
 
     def test_restricted_target_rejected(self):
-        self.change("target-profiles/production-v1.json", lambda v:
+        self.change("target-profiles/production-v2.json", lambda v:
                     v["targets"][0].update(scope="restricted-scalar-interval"))
         self.reject()
 
     def test_invented_baseline_rejected(self):
-        self.change("target-profiles/production-v1.json", lambda v:
+        self.change("target-profiles/production-v2.json", lambda v:
                     v["targets"][0].update(qualified_baseline={"time_log2": 128}))
         self.reject()
 
     def test_status_cannot_assert_qualification(self):
-        for path in ("target-profiles/production-v1.json",
-                     "cost-models/classical-word-ram-v1.json"):
+        for path in ("target-profiles/production-v2.json",
+                     "cost-models/classical-group-work-v2.json"):
             with self.subTest(path=path):
                 original = (self.root / path).read_text()
-                self.change(path, lambda v: v.update(state="qualified"))
+                self.change(path, lambda v: v.update(state="plausible_not_refuted"))
                 self.reject()
                 (self.root / path).write_text(original)
 

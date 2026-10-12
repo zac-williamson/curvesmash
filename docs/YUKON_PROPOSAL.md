@@ -1,17 +1,15 @@
-# Yukon proposal
+# Yukon challenge application
 
-Draft for [Yukon's challenge form](https://www.yukon.org/create). Not submitted. Organizer contact details still need to be supplied.
+Repository: [zac-williamson/curvesmash](https://github.com/zac-williamson/curvesmash), public. Owner: zac-williamson. This file is the application text, not evidence that Yukon has registered the challenge.
 
-## Problem
+## Goal metric
 
-Curvesma.sh is an AI-assisted cryptanalysis challenge with two production targets: secp256k1 discrete logarithms and BLS12-381 pairing inversion into G1 with a fixed G2 generator. Both minimize log₂ classical word-operation work budget with at least 39% success. Submissions must support their full-size complexity claims; smaller experiments supply evidence.
+Minimize the computation needed to solve secp256k1 discrete logarithms or invert the BLS12-381 pairing. Each problem has a separate leaderboard. Scores are log2 of total computation under a fixed reference-operation cost model; lower is better. Algorithms must succeed on at least 39% of uniformly random challenges. Preprocessing and failed attempts count.
 
-## Evaluation
+## Objective scoring
 
-The evaluator is implemented: mathematical output checks, isolated experiments, authenticated cryptanalysis/cost review and evidence-bound scoring. Scores include preprocessing and require a qualifying review; owner approval is required before promotion. Both initial baselines have passed live AI reviews and emitted verified scores: 155.218461 for secp256k1 and 153.944862 for BLS12-381 inversion. They are fully accounted generic controls, not practical attacks or best-known estimates. See the [qualification record](BASELINE_QUALIFICATION.md). Independent human cryptanalytic validation, judge calibration and Yukon integration remain outstanding. Local and Linux CI checks pass.
+Submissions describe the attack, justify its success probability and explain all computation costs in a written argument. AI reviewers assess the algorithm, costs and supporting experiments against published exploratory rules, following HashSmash. Fatal objections receive defense and adjudication. A concrete, supported submission with no confirmed fatal flaw receives its submitted computation bound as the score; remaining uncertainty is published. Review acceptance is not mathematical proof. Improved scores require owner approval before Yukon promotion.
 
 ## Integration
 
-Please confirm the production registration workflow, repository App access, review-provider setup, and hosting a branded results page at curvesma.sh. Integration will begin with submissions closed.
-
-Repository: [zac-williamson/curvesmash](https://github.com/zac-williamson/curvesmash), currently private.
+Please grant production benchmark-owner/import access, install the production GitHub App and import both tracks from the root manifest with submissions initially closed. We need to verify baseline runs, score-artifact ingestion, protected candidate paths and the manual promotion lifecycle before opening. No website or production import is claimed by this application.

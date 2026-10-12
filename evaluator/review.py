@@ -1,4 +1,4 @@
-"""Authenticated review and deterministic rigorous qualification. No model voting."""
+"""Authenticated review and deterministic exploratory qualification. No model voting."""
 from datetime import datetime, timezone, timedelta
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
@@ -101,16 +101,14 @@ def initial(record, evidence, binding, policy):
             "Review obligation coverage mismatch")
     for obligation in obligations:
         assessment(obligation, evidence)
-        require(obligation["status"] in ("discharged", "unresolved"), "Invalid obligation status")
+        require(obligation["status"] in ("supported", "not_applicable", "unresolved"), "Invalid obligation status")
     heuristics = body["heuristics"]
     require(type(heuristics) is list and len(heuristics) <= 64, "Invalid heuristic coverage")
     expected_ids = {h["id"] for h in evidence["claim"]["heuristics"]}
     actual_ids = {h.get("id") for h in heuristics}
     require(len(actual_ids) == len(heuristics), "Duplicate heuristic assessment")
     if role in ("cryptanalysis", "experiments"):
-        require(actual_ids == expected_ids, "Every heuristic needs both substantive reviews")
-    else:
-        require(not heuristics, "Heuristics belong to substantive review roles")
+        require(expected_ids <= actual_ids, "Every heuristic needs both substantive reviews")
     for heuristic in heuristics:
         assessment(heuristic, evidence)
         require(heuristic["status"] in ("established", "plausible", "unsupported", "refuted"),
@@ -130,22 +128,38 @@ def initial(record, evidence, binding, policy):
                 and set(finding["obligations"]) <= set(OBLIGATIONS[role]),
                 "Finding must identify affected obligations")
         require(type(finding["heuristic_ids"]) is list and
-                set(finding["heuristic_ids"]) <= expected_ids, "Unknown challenged heuristic")
+                set(finding["heuristic_ids"]) <= expected_ids | actual_ids, "Unknown challenged heuristic")
     for heuristic in heuristics:
         if heuristic["status"] == "refuted":
             require(any(f["severity"] == "fatal" and heuristic["id"] in f["heuristic_ids"]
                         for f in findings), "Refuted heuristic needs a challengeable fatal finding")
     reconstruction = body["reconstruction"]
     if role == "cost":
-        exact(reconstruction, ("total_word_operations", "peak_memory_bytes", "preprocessing_operations",
-                               "advice_bytes", "success_probability"))
-        for field in ("total_word_operations", "peak_memory_bytes", "preprocessing_operations", "advice_bytes"):
-            decimal_integer(reconstruction[field], 1 if field in
-                            ("total_word_operations", "peak_memory_bytes") else 0)
+        exact(reconstruction, ("time_log2", "memory_log2_bytes", "preprocessing_log2",
+                               "nonuniform_advice_log2_bytes", "success_probability"))
+        for field in ("time_log2", "memory_log2_bytes", "preprocessing_log2",
+                      "nonuniform_advice_log2_bytes"):
+            number(reconstruction[field], 0, 2048)
         number(reconstruction["success_probability"], 0, 1)
+        statuses = {item["id"]: item["status"] for item in body["obligations"]}
+        for obligation in cost_discrepancies(reconstruction, evidence["claim"]["claim"]):
+            require(statuses[obligation] != "supported" or any(
+                f["severity"] == "fatal" and obligation in f["obligations"] for f in findings),
+                "Supported cost contradicts submitted bound without a linked fatal finding")
     else:
         require(reconstruction is None, "Only cost review reconstructs resource bounds")
     return body
+
+
+def cost_discrepancies(reconstruction, bounds):
+    mapping = {"time_log2": "total_work", "memory_log2_bytes": "memory",
+               "preprocessing_log2": "preprocessing_advice",
+               "nonuniform_advice_log2_bytes": "preprocessing_advice"}
+    result = {obligation for field, obligation in mapping.items()
+              if reconstruction[field] > bounds[field] + 1e-6}
+    if reconstruction["success_probability"] + 1e-6 < bounds["success_probability"]:
+        result.add("total_work")
+    return result
 
 
 def template(record, role, reviewer, experiment=None):
@@ -156,15 +170,8 @@ def template(record, role, reviewer, experiment=None):
     def item(id):
         return {"id": id, "status": "unresolved", "reason": "Review required.", "citations": citations}
     bounds = evidence["claim"]["claim"]
-    ledger = parse(evidence["files"]["candidate/"+evidence["claim"]["resource_ledger"]]["text"])
-    reconstruction = None
-    if role == "cost":
-        reconstruction = {"total_word_operations": bounds["work_budget_word_operations"],
-            "peak_memory_bytes": ledger["peak_memory_bytes"],
-            "preprocessing_operations": str(sum(int(ledger["components"][k])
-                                                 for k in ledger["preprocessing_components"])),
-            "advice_bytes": str(ledger["advice_bytes"]),
-            "success_probability": bounds["success_probability"]}
+    reconstruction = {k: bounds[k] for k in ("time_log2", "memory_log2_bytes",
+        "preprocessing_log2", "nonuniform_advice_log2_bytes", "success_probability")} if role == "cost" else None
     return {"kind": "review", "reviewer": reviewer,
         "issued_at": datetime.now(timezone.utc).isoformat(), "binding": record["binding"],
         "role": role, "provenance": {"kind": "human", "model": "human", "request_id": "manual",
@@ -199,8 +206,8 @@ def aggregate(record, reviews, challenges=(), definition_approval=None, experime
     obligations = {(role, x["id"]): x["status"] for role, b in bodies.items()
                    for x in b["obligations"]}
     findings = {(digest(initial_records[role]), f["id"]): (role, f)
-                for role, b in bodies.items() for f in b["findings"] if f["severity"] != "note"}
-    resolved, confirmed = set(), []
+                for role, b in bodies.items() for f in b["findings"] if f["severity"] == "fatal"}
+    resolved, confirmed, resolutions = set(), [], {}
     for challenge in challenges:
         exact(challenge, ("defense", "adjudication"))
         defense = verify(challenge["defense"], policy, "defender", binding)
@@ -230,44 +237,48 @@ def aggregate(record, reviews, challenges=(), definition_approval=None, experime
                 and set(discharged) <= set(finding["obligations"]), "Unlinked obligation discharge")
         require(decision == "dismissed" or not discharged, "Cannot discharge an unresolved finding")
         resolved.add(key)
+        resolutions[key]=decision
         if decision == "confirmed" and finding["severity"] == "fatal":
             confirmed.append(key)
         elif decision != "dismissed":
             blockers.append("Unresolved finding: "+finding["id"])
         else:
             for id in discharged:
-                obligations[(role, id)] = "discharged"
-            # Dismissing an objection does not establish the linked heuristic.
-            if finding["heuristic_ids"]:
-                blockers.append("Heuristic needs substantive reassessment after dismissal: "+finding["id"])
+                obligations[(role, id)] = "supported"
     for key in set(findings)-resolved:
-        blockers.append("Finding awaits defense/adjudication: "+key[1])
-    for (role, id), status in obligations.items():
-        if status != "discharged":
-            blockers.append("Unresolved obligation: "+role+"/"+id)
-    for role, body in bodies.items():
-        for h in body["heuristics"]:
-            if h["status"] != "established":
-                blockers.append("Heuristic not established: "+role+"/"+h["id"])
-    if "cost" in bodies:
-        r = bodies["cost"]["reconstruction"]
-        bounds = evidence["claim"]["claim"]
-        ledger = parse(evidence["files"]["candidate/"+evidence["claim"]["resource_ledger"]]["text"])
-        prep = sum(int(ledger["components"][k]) for k in ledger["preprocessing_components"])
-        if (int(r["total_word_operations"]) > int(bounds["work_budget_word_operations"])
-            or int(r["peak_memory_bytes"]) > int(ledger["peak_memory_bytes"])
-            or int(r["preprocessing_operations"]) > prep or int(r["advice_bytes"]) > ledger["advice_bytes"]
-            or r["success_probability"] < bounds["success_probability"]):
-            blockers.append("Reconstructed resources or success do not support the submitted bounds")
-    if definition_approval is None:
-        blockers.append("Protected definitions/evaluator lack scientific approval")
-    else:
+        blockers.append("Fatal finding awaits defense/adjudication: "+key[1])
+    evaluability_gaps = [id for (role, id), status in obligations.items()
+                        if role == "evaluability" and status not in ("supported", "not_applicable")]
+    unsupported = [role+"/"+h["id"] for role, body in bodies.items()
+                   for h in body["heuristics"] if h["status"] == "unsupported"]
+    # Keep uncertainties visible without requiring the rigorous lane's discharge gate.
+    uncertainties = [role+"/"+id for (role, id), status in obligations.items()
+                     if status not in ("supported", "not_applicable")]
+    heuristic_assessments={}
+    for role,body in bodies.items():
+        for h in body['heuristics']:
+            linked=[key for key,(finding_role,f) in findings.items()
+                    if finding_role==role and h['id'] in f['heuristic_ids']]
+            status=h['status']
+            if status=='refuted':
+                decisions=[resolutions.get(key,'unresolved') for key in linked]
+                status='refuted' if 'confirmed' in decisions else 'pending_reassessment' if decisions and all(d=='dismissed' for d in decisions) else 'unresolved_refutation'
+            heuristic_assessments[role+'/'+h['id']]={'review_status':h['status'],'effective_status':status,
+                'linked_fatal_findings':[list(key) for key in linked]}
+            if status!='established':uncertainties.append(role+'/heuristic/'+h['id']+': '+status)
+    uncertainties += [role+"/"+f["id"] for role, body in bodies.items()
+                      for f in body["findings"] if f["severity"] == "unresolved"]
+    all_ids = {h['id'] for body in bodies.values() for h in body['heuristics']}
+    for role in ('cryptanalysis','experiments'):
+        assessed = {h['id'] for h in bodies.get(role,{}).get('heuristics',[])}
+        uncertainties += [role+'/unreviewed-heuristic/'+id for id in all_ids-assessed]
+    # A signed organizer receipt is optional provenance, never scientific evidence.
+    if definition_approval is not None:
         approval = verify(definition_approval, policy, "definitions", definitions_binding(evidence))
         exact(approval, ("kind", "reviewer", "issued_at", "binding", "decision", "reason"))
+        require(approval["kind"] == "definitions" and approval["decision"] == "approved",
+                "Invalid optional organizer receipt")
         text(approval["reason"])
-        require(approval["kind"] == "definitions", "Wrong definition approval kind")
-        if approval["decision"] != "approved":
-            blockers.append("Definitions not approved")
     if evidence["experiment_required"]:
         if experiment is None:
             blockers.append("Declared experiments missing")
@@ -276,11 +287,21 @@ def aggregate(record, reviews, challenges=(), definition_approval=None, experime
             validate_report(experiment, record, policy)
     else:
         require(experiment is None, "Unexpected experiment record")
-    state = "refuted" if confirmed else "not_qualified" if blockers else "qualified"
+    if missing or len(keys) < policy["minimum_distinct_initial_reviewers"] or set(findings)-resolved or (evidence["experiment_required"] and experiment is None):
+        state = "infra_failed"
+    elif confirmed:
+        state = "refuted"
+    elif evaluability_gaps or unsupported:
+        state = "not_evaluable"
+        blockers += ["Evaluability: "+x for x in evaluability_gaps] + ["Unsupported heuristic: "+x for x in unsupported]
+    else:
+        state = "plausible_not_refuted"
+        uncertainties += blockers
+        blockers = []
     if not reviews and not challenges:
         state = "pending_review"
     return {"schema_version": 1, "binding": binding, "track": evidence["track"],
-        "outcome": state, "blockers": sorted(set(blockers)), "confirmed_findings": [list(x) for x in confirmed],
+        "outcome": state, "heuristic_assessments": heuristic_assessments, "uncertainties": sorted(set(uncertainties)), "policy": "exploratory-review-v1", "blockers": sorted(set(blockers)), "confirmed_findings": [list(x) for x in confirmed],
         "reviews": list(reviews), "challenges": list(challenges), "definition_approval": definition_approval,
         "experiment": experiment, "claim_kind": evidence["claim"]["baseline_kind"],
         "meaning": "Reviewed complexity claim; qualification is not a proof, measured attack, novelty claim or promotion."}
@@ -291,10 +312,11 @@ def score(record, dossier):
     require(dossier["binding"] == record["binding"], "Stale dossier")
     rebuilt = aggregate(record, dossier["reviews"], dossier["challenges"],
                         dossier["definition_approval"], dossier["experiment"])
-    require(rebuilt == dossier and rebuilt["outcome"] == "qualified", "Dossier does not qualify")
+    require(rebuilt == dossier and rebuilt["outcome"] == "plausible_not_refuted", "Dossier does not qualify")
     claim = record["evidence"]["claim"]["claim"]
-    value = log2_upper(int(claim["work_budget_word_operations"]))
+    value = claim["time_log2"]
     return {"score": value, "timeLog2": value,
             "binding": record["binding"], "dossier_sha256": digest(dossier),
             "track": rebuilt["track"], "claim_kind": rebuilt["claim_kind"],
+            "policy": rebuilt["policy"], "timeUnit": claim["time_unit"],
             "memoryLog2Bytes": claim["memory_log2_bytes"], "promotionMode": "manual"}

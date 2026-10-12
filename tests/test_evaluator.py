@@ -51,7 +51,7 @@ class Evaluation(unittest.TestCase):
         for role in review.OBLIGATIONS:
             body = review.template(record, role, role)
             for item in body["obligations"]:
-                item.update(status="discharged", reason="Synthetic fixture: organizer gate test only.")
+                item.update(status="supported", reason="Synthetic fixture: organizer gate test only.")
             for item in body["heuristics"]:
                 item.update(status="established", reason="Synthetic fixture only.")
             result.append(review.sign(body, self.keys[role]))
@@ -181,7 +181,7 @@ class Evaluation(unittest.TestCase):
             lambda v: v["claim"].update(success_probability=True),
             lambda v: v["claim"].update(success_probability=0.38),
             lambda v: v["claim"].update(success_probability=10**511),
-            lambda v: v["claim"].update(time_log2=1),
+            lambda v: v["claim"].update(time_log2=float("nan")),
             lambda v: v["claim"].update(work_budget_word_operations="01")]
         for mutation in mutations:
             file.write_text(original)
@@ -189,18 +189,13 @@ class Evaluation(unittest.TestCase):
             with self.assertRaises(ValueError):
                 intake.build_evidence(self.root, TRACK)
 
-    def test_ledger_totals_and_peak_memory(self):
-        path = "candidates/"+TRACK+"/ledger.json"
-        file = self.root / path
-        original = file.read_text()
-        for mutation in (lambda v: v["components"].update(omitted_work="1"),
-                         lambda v: v.update(preprocessing_components=["missing"]),
-                         lambda v: v.update(advice_bytes=True),
-                         lambda v: v.update(peak_memory_bytes=str((1<<256)*33))):
-            file.write_text(original)
-            self.change(path, mutation)
-            with self.assertRaises(ValueError):
-                intake.build_evidence(self.root, TRACK)
+    def test_prose_accounting_needs_no_structured_ledger(self):
+        self.assertNotIn("resource_ledger", self.record["evidence"]["claim"])
+        self.assertNotIn("candidate/ledger.json", self.record["evidence"]["files"])
+        path = "candidates/"+TRACK+"/claim.json"
+        self.change(path, lambda v: v["claim"].update(memory_log2_bytes=262))
+        with self.assertRaises(ValueError):
+            intake.build_evidence(self.root, TRACK)
 
     def test_policy_cannot_reduce_review_standard(self):
         self.policy["minimum_distinct_initial_reviewers"] = 1
@@ -218,7 +213,7 @@ class Evaluation(unittest.TestCase):
 
     def test_valid_synthetic_end_to_end_score(self):
         dossier = self.dossier()
-        self.assertEqual(dossier["outcome"], "qualified")
+        self.assertEqual(dossier["outcome"], "plausible_not_refuted")
         result = review.score(self.record, dossier)
         self.assertEqual(result["timeLog2"], self.record["evidence"]["claim"]["claim"]["time_log2"])
         self.assertEqual(result["promotionMode"], "manual")
@@ -226,23 +221,23 @@ class Evaluation(unittest.TestCase):
 
     def test_pending_cannot_score_or_fake_outcome(self):
         dossier = review.aggregate(self.record, [])
-        dossier["outcome"] = "qualified"
+        dossier["outcome"] = "plausible_not_refuted"
         with self.assertRaises(ValueError):
             review.score(self.record, dossier)
 
     def test_library_scorer_rejects_mutated_envelope_and_claim_copy(self):
         dossier = self.dossier()
         altered = copy.deepcopy(self.record)
-        altered["evidence"]["claim"]["claim"]["work_budget_word_operations"] = "1"
+        altered["evidence"]["claim"]["claim"]["time_log2"] = 1
         with self.assertRaises(ValueError):
             review.score(altered, dossier)
         altered["binding"] = common.digest(altered["evidence"])
         with self.assertRaises(ValueError):
             intake.check_evidence(altered)
 
-    def test_missing_review_and_definition_approval_block(self):
-        self.assertEqual(self.dossier(self.signed_reviews()[:-1])["outcome"], "not_qualified")
-        self.assertEqual(review.aggregate(self.record, self.signed_reviews())["outcome"], "not_qualified")
+    def test_missing_review_blocks_and_extra_definition_approval_is_not_required(self):
+        self.assertEqual(self.dossier(self.signed_reviews()[:-1])["outcome"], "infra_failed")
+        self.assertEqual(review.aggregate(self.record, self.signed_reviews())["outcome"], "plausible_not_refuted")
 
     def test_signature_binding_authority_and_freshness(self):
         records = self.signed_reviews()
@@ -276,40 +271,52 @@ class Evaluation(unittest.TestCase):
             self.policy["reviewers"][role]["public_key"] = self.policy["reviewers"]["evaluability"]["public_key"]
         self.save_policy()
         record = intake.build_evidence(self.root, TRACK)
-        self.assertEqual(self.dossier(record=record)["outcome"], "not_qualified")
+        self.assertEqual(self.dossier(record=record)["outcome"], "infra_failed")
 
-    def test_worse_resource_reconstruction_blocks_even_with_discharged_label(self):
+    def test_supported_cost_discrepancy_requires_a_fatal_objection(self):
         records = self.signed_reviews()
-        for field in ("total_word_operations", "peak_memory_bytes", "preprocessing_operations", "advice_bytes"):
-            def mutate(body):
-                body["reconstruction"][field] = str(int(body["reconstruction"][field])+1)
+        for field in ("time_log2", "memory_log2_bytes", "preprocessing_log2", "nonuniform_advice_log2_bytes"):
             with self.subTest(field=field):
-                self.assertEqual(self.dossier(self.resign(records, "cost", mutate))["outcome"], "not_qualified")
-        records = self.resign(records, "cost", lambda b: b["reconstruction"].update(success_probability=0.99))
-        self.assertEqual(self.dossier(records)["outcome"], "not_qualified")
+                changed = self.resign(records, "cost", lambda b: b["reconstruction"].update(
+                    {field: b["reconstruction"][field]+1}))
+                with self.assertRaises(ValueError):
+                    self.dossier(changed)
+        changed = self.resign(records, "cost", lambda b: b["reconstruction"].update(success_probability=0.99))
+        with self.assertRaises(ValueError):
+            self.dossier(changed)
+
+    def test_uncertain_cost_can_score_and_remains_visible(self):
+        records = self.signed_reviews()
+        def change(body):
+            body["reconstruction"]["time_log2"] += 1
+            next(x for x in body["obligations"] if x["id"] == "total_work")["status"] = "unresolved"
+        dossier = self.dossier(self.resign(records, "cost", change))
+        self.assertEqual(dossier["outcome"], "plausible_not_refuted")
+        self.assertIn("cost/total_work", dossier["uncertainties"])
 
     def test_unresolved_obligation_is_not_refutation(self):
         records = self.resign(self.signed_reviews(), "cryptanalysis",
                              lambda b: b["obligations"][0].update(status="unresolved"))
-        self.assertEqual(self.dossier(records)["outcome"], "not_qualified")
+        self.assertEqual(self.dossier(records)["outcome"], "plausible_not_refuted")
 
     def test_fatal_requires_defense_adjudication_and_preserves_all_records(self):
         records = self.finding()
-        self.assertEqual(self.dossier(records)["outcome"], "not_qualified")
+        self.assertEqual(self.dossier(records)["outcome"], "infra_failed")
         confirmed = self.dossier(records, challenges=[self.challenge(records, "confirmed")])
         self.assertEqual(confirmed["outcome"], "refuted")
         dismissed = self.dossier(records, challenges=[self.challenge(records)])
-        self.assertEqual(dismissed["outcome"], "qualified")
+        self.assertEqual(dismissed["outcome"], "plausible_not_refuted")
         self.assertEqual(dismissed["reviews"], records)
         self.assertEqual(len(dismissed["challenges"]), 1)
 
     def test_dismissal_without_explicit_discharge_and_unresolved_adjudication_block(self):
         records = self.finding()
         for challenge in (self.challenge(records, discharged=[]), self.challenge(records, "unresolved")):
-            self.assertEqual(self.dossier(records, challenges=[challenge])["outcome"], "not_qualified")
+            self.assertEqual(self.dossier(records, challenges=[challenge])["outcome"], "plausible_not_refuted")
         records = self.finding("unresolved")
-        self.assertEqual(self.dossier(records, challenges=[self.challenge(records, "confirmed")])["outcome"],
-                         "not_qualified")
+        self.assertEqual(self.dossier(records)["outcome"], "plausible_not_refuted")
+        with self.assertRaises(ValueError):
+            self.dossier(records, challenges=[self.challenge(records, "confirmed")])
 
     def test_duplicate_unlinked_and_self_adjudication_rejected(self):
         records = self.finding()
@@ -324,17 +331,32 @@ class Evaluation(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.dossier(records, challenges=[altered])
 
-    def test_heuristics_require_both_roles_and_established_support(self):
+    def test_heuristics_require_both_roles_and_plausible_support(self):
         self.change("candidates/"+TRACK+"/claim.json", lambda v: v.update(heuristics=[{
             "id": "H1", "statement": "Synthetic fixture", "role": "success", "evidence": ["proof.md"],
             "scope": "fixture", "extrapolation": "fixture", "limitations": "fixture"}]))
         record = intake.build_evidence(self.root, TRACK)
         records = self.signed_reviews(record)
-        self.assertEqual(self.dossier(records, record=record)["outcome"], "qualified")
+        self.assertEqual(self.dossier(records, record=record)["outcome"], "plausible_not_refuted")
         altered = self.resign(records, "experiments", lambda b: b["heuristics"][0].update(status="plausible"))
-        self.assertEqual(self.dossier(altered, record=record)["outcome"], "not_qualified")
+        self.assertEqual(self.dossier(altered, record=record)["outcome"], "plausible_not_refuted")
+        unsupported=self.resign(records,"experiments",lambda b:b["heuristics"][0].update(status="unsupported"))
+        self.assertEqual(self.dossier(unsupported,record=record)["outcome"],"not_evaluable")
         with self.assertRaises(ValueError):
             self.dossier(self.resign(records, "cryptanalysis", lambda b: b.update(heuristics=[])), record=record)
+
+    def test_evaluability_gap_and_unsupported_heuristic_block_exploratory_scoring(self):
+        records=self.resign(self.signed_reviews(), 'evaluability',
+            lambda b:b['obligations'][0].update(status='unresolved'))
+        self.assertEqual(self.dossier(records)['outcome'],'not_evaluable')
+        with self.assertRaises(ValueError):review.score(self.record,self.dossier(records))
+
+    def test_analysis_counts_are_bounded_and_do_not_assert_attack_success(self):
+        self.assertEqual(experiments.analysis_output({'counts':[{'id':'H','tested':100,'satisfied':39}]}),
+                         {'counts':[{'id':'H','tested':100,'satisfied':39}]})
+        for count in ({'id':'H','tested':True,'satisfied':0}, {'id':'H','tested':100,'satisfied':101},
+                      {'id':'H','tested':0,'satisfied':0}):
+            with self.assertRaises(ValueError):experiments.analysis_output({'counts':[count]})
 
     def test_provider_transport_schema_provenance_and_no_tools(self):
         self.policy["provider"]["models"]["evaluability"] = "vendor/exact-model"
@@ -410,10 +432,10 @@ print(json.dumps({"x": "0"*64}))
         for role in review.OBLIGATIONS:
             body = review.template(record, role, role, report)
             for item in body["obligations"]:
-                item.update(status="discharged", reason="Synthetic fixture only.")
+                item.update(status="supported", reason="Synthetic fixture only.")
             reviews.append(review.sign(body, self.keys[role]))
         dossier = review.aggregate(record, reviews, definition_approval=self.approval(record), experiment=report)
-        self.assertEqual(dossier["outcome"], "qualified")
+        self.assertEqual(dossier["outcome"], "plausible_not_refuted")
         altered = copy.deepcopy(report)
         altered["body"]["results"][0]["valid"] = False
         altered = review.sign(altered["body"], self.keys["execution"])
@@ -421,6 +443,21 @@ print(json.dumps({"x": "0"*64}))
             experiments.validate_report(altered, record, self.policy)
         with self.assertRaises(ValueError):
             review.aggregate(record, reviews, definition_approval=self.approval(record), experiment=altered)
+
+    @unittest.skipUnless(os.environ.get("CURVESMASH_TEST_IMAGE"), "Pinned Docker test image not supplied")
+    def test_real_container_analysis_counts_are_not_production_attack_results(self):
+        self.policy['experiment_image']=os.environ['CURVESMASH_TEST_IMAGE'];self.save_policy()
+        folder=self.root/'candidates'/TRACK
+        (folder/'counts.py').write_text('import json,sys\np=json.loads(sys.stdin.readline())\nassert set(p)=={"track","trial","seed"}\nprint(json.dumps({"counts":[{"id":"H","tested":100,"satisfied":39}]}))\n')
+        self.change('candidates/'+TRACK+'/claim.json',lambda c:c.update(
+            experiment={'entrypoint':'counts.py','trials':1,'kind':'analysis'}))
+        record=intake.build_evidence(self.root,TRACK)
+        report=experiments.run(record,self.policy,'execution',self.keys['execution'])
+        experiments.validate_report(report,record,self.policy)
+        self.assertIsNone(report['body']['results'][0]['valid'])
+        bad=copy.deepcopy(report);bad['body']['results'][0]['valid']=True
+        with self.assertRaises(ValueError):
+            experiments.validate_report(review.sign(bad['body'],self.keys['execution']),record,self.policy)
 
     def test_bounded_process_timeout_and_output_flood(self):
         for code, timeout, limit in (("import time; time.sleep(5)", 0.1, 1024),

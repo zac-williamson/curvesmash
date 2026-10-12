@@ -8,9 +8,9 @@ from .common import (MAX_BYTES, HEX, exact, text, number, integer, decimal_integ
                      relative, parse, read_file, read_json, digest, sha, require)
 
 TRACKS = ("secp256k1-ecdlp", "bls12-381-invert-g1")
-PROFILE = "target-profiles/production-v1.json"
-COST = "cost-models/classical-word-ram-v1.json"
-POLICY = "evaluation/policy-v1.json"
+PROFILE = "target-profiles/production-v2.json"
+COST = "cost-models/classical-group-work-v2.json"
+POLICY = "evaluation/policy-v2.json"
 
 
 def snapshot(directory):
@@ -52,24 +52,25 @@ def close_log(reported, bound):
     require(reported == log2_upper(max(1, bound)), "Logarithm must be organizer-rounded log2 bound")
 
 
-def validate_claim(files, track, profiles, cost):
+def validate_claim(files, track, profiles, cost, allow_draft=False):
     require("candidate/claim.json" in files, "Missing claim.json")
     claim = parse(files["candidate/claim.json"]["text"])
     keys = {"schema_version", "target_profile", "target_id", "cost_model",
             "target_profile_sha256", "cost_model_sha256", "submission_state",
-            "review_status", "baseline_kind", "algorithm", "proof", "resource_ledger",
-            "claim", "heuristics", "limitations"}
+            "review_status", "baseline_kind", "algorithm", "proof",
+            "claim", "heuristics", "limitations", "lane"}
     require(type(claim) is dict and keys <= set(claim) <= keys | {"experiment"},
             "Claim has missing or unexpected fields")
-    require(type(claim["schema_version"]) is int and claim["schema_version"] == 1,
+    require(type(claim["schema_version"]) is int and claim["schema_version"] == 2,
             "Wrong claim schema")
-    require(claim["submission_state"] == "ready" and claim["review_status"] == "pending",
+    require(claim["submission_state"] in (("draft", "ready") if allow_draft else ("ready",)) and claim["review_status"] == "pending",
             "Candidate must be ready; candidate cannot assert review acceptance")
-    require(claim["target_id"] == track and claim["target_profile"] == "production-v1"
-            and claim["cost_model"] == "classical-word-ram-v1", "Wrong target or cost model")
+    require(claim["target_id"] == track and claim["target_profile"] == "production-v2"
+            and claim["cost_model"] == "classical-group-work-v2", "Wrong target or cost model")
     for key, path in (("target_profile_sha256", PROFILE), ("cost_model_sha256", COST)):
         require(claim[key] == files[path]["sha256"], "Stale definition binding")
-    for key in ("proof", "resource_ledger"):
+    require(claim["lane"] == "exploratory", "Only the exploratory policy is registered")
+    for key in ("proof",):
         relative(claim[key])
         require("candidate/"+claim[key] in files, "Missing evidence reference")
     require(claim["baseline_kind"] in ("generic-accounting-control", "research-claim"),
@@ -80,37 +81,16 @@ def validate_claim(files, track, profiles, cost):
     for item in claim["limitations"]:
         text(item)
     bounds = claim["claim"]
-    exact(bounds, ("time_log2", "time_unit", "work_budget_word_operations",
-                   "memory_log2_bytes", "preprocessing_log2", "success_probability",
-                   "nonuniform_advice_log2_bytes"))
-    require(bounds["time_unit"] == "word-operations", "Wrong work unit")
-    total = decimal_integer(bounds["work_budget_word_operations"], 1)
+    exact(bounds, ("time_log2", "time_unit", "memory_log2_bytes", "preprocessing_log2",
+                   "success_probability", "nonuniform_advice_log2_bytes"))
+    require(bounds["time_unit"] == "target-group-operations", "Wrong work unit")
+    for field in ("time_log2", "memory_log2_bytes", "preprocessing_log2",
+                  "nonuniform_advice_log2_bytes"):
+        number(bounds[field], 0, 2048)
     number(bounds["success_probability"], cost["success_probability_minimum"], 1)
-    ledger = parse(files["candidate/"+claim["resource_ledger"]]["text"])
-    require(type(ledger) is dict, "Invalid ledger")
-    components = ledger["components"]
-    require(type(components) is dict and 0 < len(components) <= 128,
-            "Ledger needs disjoint total work components")
-    for key in components:
-        text(key, 256)
-    values = {k: decimal_integer(v) for k, v in components.items()}
-    require(sum(values.values()) == total, "Work components do not sum to budget")
-    prep_keys = ledger["preprocessing_components"]
-    require(type(prep_keys) is list and all(type(k) is str for k in prep_keys)
-            and len(set(prep_keys)) == len(prep_keys) and set(prep_keys) <= set(values),
-            "Invalid preprocessing subset")
-    prep = sum(values[k] for k in prep_keys)
-    memory = decimal_integer(ledger["peak_memory_bytes"], 1)
-    advice = integer(ledger["advice_bytes"], 0, 10**512)
-    require(advice <= memory and memory <= (1 << 256)*32,
+    require(bounds["nonuniform_advice_log2_bytes"] <= bounds["memory_log2_bytes"] <= 261,
             "Storage exceeds declared peak or RAM address space")
-    require(type(ledger["success_probability"]) in (int, float) and
-            ledger["success_probability"] == bounds["success_probability"],
-            "Success claims disagree")
-    close_log(bounds["time_log2"], total)
-    close_log(bounds["preprocessing_log2"], prep)
-    close_log(bounds["memory_log2_bytes"], memory)
-    close_log(bounds["nonuniform_advice_log2_bytes"], advice)
+    # Cost arithmetic and scientific support are reviewed from the written argument.
     # Detailed kernel bounds are reviewed, not executed or accepted by this sum check.
     require(type(claim["heuristics"]) is list and len(claim["heuristics"]) <= 64,
             "Invalid heuristics")
@@ -128,7 +108,8 @@ def validate_claim(files, track, profiles, cost):
             relative(ref)
             require("candidate/"+ref in files, "Missing heuristic evidence")
     if "experiment" in claim:
-        exact(claim["experiment"], ("entrypoint", "trials"))
+        require(set(claim["experiment"]) in ({"entrypoint", "trials"}, {"entrypoint", "trials", "kind"}), "Invalid experiment fields")
+        require(claim["experiment"].get("kind", "attack") in ("attack", "analysis"), "Unknown experiment kind")
         relative(claim["experiment"]["entrypoint"])
         require("candidate/"+claim["experiment"]["entrypoint"] in files,
                 "Missing experiment entrypoint")
@@ -136,11 +117,11 @@ def validate_claim(files, track, profiles, cost):
     return claim
 
 
-def build_evidence(root, track, candidate=None):
+def build_evidence(root, track, candidate=None, allow_draft=False):
     root = Path(root).absolute()
     require(track in TRACKS, "Unknown track")
     files = snapshot(candidate or root / "candidates" / track)
-    protected = [PROFILE, COST, POLICY, "requirements.lock", "benchmark.json"]
+    protected = [PROFILE, COST, POLICY, "requirements.lock", "benchmark.json", "reorg/plan.json", "schemas/claim-v2.schema.json"]
     protected += sorted(p.relative_to(root).as_posix() for p in
                         (root / "evaluator").glob("*.py"))
     protected += sorted(p.relative_to(root).as_posix() for p in
@@ -168,12 +149,12 @@ def build_evidence(root, track, candidate=None):
     for name, version in re.findall(r"^([A-Za-z0-9_-]+)==([^\s]+)",
                                    files["requirements.lock"]["text"], re.MULTILINE):
         require(importlib.metadata.version(name) == version, "Organizer dependency version mismatch")
-    require(profiles["id"] == "production-v1" and cost["id"] == "classical-word-ram-v1"
-            and cost["word_bits"] == 256 and cost["time_unit"] == "word-operations"
+    require(profiles["id"] == "production-v2" and cost["id"] == "classical-group-work-v2"
+            and cost["word_bits"] == 256 and cost["time_unit"] == "target-group-operations"
             and cost["success_probability_minimum"] == 0.39
             and {x["id"] for x in profiles["targets"]} == set(TRACKS),
             "Wrong protected definitions")
-    claim = validate_claim(files, track, profiles, cost)
+    claim = validate_claim(files, track, profiles, cost, allow_draft)
     runtime = {x: importlib.metadata.version(x) for x in ("cryptography", "py-ecc")}
     envelope = {"schema_version": 1, "track": track, "files": dict(sorted(files.items())),
                 "claim": claim, "runtime": runtime,
@@ -208,7 +189,7 @@ def validate_policy(policy):
         "maximum_review_age_days", "maximum_definition_age_days", "minimum_distinct_initial_reviewers",
         "experiment_image", "experiment_max_trials", "experiment_timeout_seconds",
         "experiment_memory_bytes", "experiment_output_bytes", "provider"))
-    require(policy["schema_version"] == 1 and policy["id"] == "rigorous-review-v1",
+    require(policy["schema_version"] == 2 and policy["id"] == "exploratory-review-v1",
             "Unknown review policy")
     require(type(policy["minimum_distinct_initial_reviewers"]) is int and
             policy["minimum_distinct_initial_reviewers"] == 4, "Four independent initial identities required")

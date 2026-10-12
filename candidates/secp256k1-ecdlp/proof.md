@@ -2,8 +2,8 @@
 
 Status: ready for independent review; no qualification or emitted score.
 This is a conservative accounting control, not a best-known attack claim.
-The normative inputs/outputs are those of `production-v1`; `claim.json`
-binds that profile and `classical-word-ram-v1` by SHA-256. No restricted
+The normative inputs/outputs are those of `production-v2`; `claim.json`
+binds that profile and `classical-group-work-v2` by SHA-256. No restricted
 challenge distribution, advice, random-oracle premise or quantum operation is used.
 
 ## Construction and success
@@ -82,7 +82,7 @@ No constant-time hashing/table oracle is assumed.
 
 For group-step cost G=C, charge m*(G+D) to build the
 baby table, S to sort it, and h*(G+V) for the full giant search. Setup and
-verification/output are added in full. `ledger.json` gives these exact
+verification/output are added in full. The accounting below gives these exact
 integer components and their sum T. The reported logarithms are rounded
 up to six decimal places; exact integers remain the audit authority.
 Preprocessing includes the whole baby table and sorting, with no reuse credit.
@@ -97,7 +97,7 @@ astronomical and mandatory for this construction; it is not a practical attack.
 
 ## Evidence and comparison
 
-The correctness argument and ledger are analytic; no full-size execution is
+The correctness argument and cost calculation are analytic; no full-size execution is
 claimed. Organizer arithmetic fixtures check the exact point/GT convention;
 organizer exhaustive finite-group checks exercise table coverage, last-block
 handling and modular output recovery. They do not certify production cost,
@@ -111,3 +111,19 @@ References: [generic DLP algorithms, HAC section 3.6](https://cacr.uwaterloo.ca/
 [automorphism-aware Pollard rho](https://www.iacr.org/archive/pkc2014/83830154/83830154.pdf).
 The needed construction and accounting are given above; review need not
 fetch citations to reconstruct them.
+
+## Submitted computation bound
+
+The following integer word-operation bounds follow from the implementation formulas above. They are ordinary proof evidence, not a required submission format.
+
+| Component | Word operations |
+| --- | ---: |
+| setup | 16777216 |
+| baby table | 26554743013579237146153626469005290262239379456 |
+| merge sort | 21603846911076541168362727076628100209442816 |
+| giant search | 26562555896723741893274745549991923660296348880 |
+| verification and output | 79926919168 |
+
+Total word operations: **53138902757214055580596734746073842102688867536**. Preprocessing word operations: **26576346860490313687321989196081918362465599488**. Peak bytes: **87112285931760246646623899502532663181312**; nonuniform advice bytes: 0.
+
+The organizer reference price for this target is 78037248 word operations. Dividing total and preprocessing work by that fixed price gives submitted time_log2 **129.000802** and preprocessing_log2 **128.001176**, rounded upward. Memory_log2_bytes remains **136.000001**. All table access, sorting, failure paths, verification and output costs are included; reference-operation normalization changes units, not the work or algorithm.

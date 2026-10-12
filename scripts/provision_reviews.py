@@ -42,7 +42,7 @@ def main():
         fd = os.open(definition_key, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(fd, 'wb') as stream:
             stream.write(definitions)
-    policy_file = root / 'evaluation/policy-v1.json'
+    policy_file = root / 'evaluation/policy-v2.json'
     policy = parse(read_file(policy_file))
     policy['reviewers'] = {role: {'roles': [role], 'public_key': Ed25519PrivateKey.from_private_bytes(
         bytes.fromhex(keys[role])).public_key().public_bytes_raw().hex()} for role in ROLES}

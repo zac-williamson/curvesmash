@@ -4,12 +4,13 @@ import os
 from pathlib import Path
 import re
 import selectors
+import secrets
 import subprocess
 import tempfile
 import time
 import uuid
 
-from .common import canonical, digest, exact, integer, number, require, parse, sha, HEX
+from .common import canonical, digest, exact, integer, number, require, parse, sha, HEX, text
 from .review import sign, verify
 from .verifier import Verifier
 from .intake import check_evidence
@@ -69,6 +70,19 @@ def bounded_process(command, stdin, timeout, limit):
             stream.close()
 
 
+def analysis_output(output):
+    exact(output, ('counts',))
+    require(type(output['counts']) is list and 0 < len(output['counts']) <= 32, 'Invalid finite-count evidence')
+    ids=set()
+    for count in output['counts']:
+        exact(count, ('id','tested','satisfied'))
+        text(count['id'],128)
+        require(count['id'] not in ids, 'Duplicate count ID');ids.add(count['id'])
+        integer(count['tested'],1,2**64)
+        integer(count['satisfied'],0,count['tested'])
+    return output
+
+
 def run(record, policy, reviewer, private_bytes=None):
     evidence = check_evidence(record)
     require(evidence["experiment_required"], "No experiment requested")
@@ -85,8 +99,10 @@ def run(record, policy, reviewer, private_bytes=None):
             dest.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
             dest.write_text(file["text"], encoding="utf-8")
             dest.chmod(0o444)
-        for _ in range(experiment["trials"]):
-            challenge, name = verifier.challenge(), "curvesmash-"+uuid.uuid4().hex
+        for trial in range(experiment["trials"]):
+            challenge = verifier.challenge() if experiment.get('kind','attack')=='attack' else {
+                'track':evidence['track'],'trial':trial,'seed':secrets.token_hex(32)}
+            name = "curvesmash-"+uuid.uuid4().hex
             command = docker_command(policy["experiment_image"], directory,
                                      experiment["entrypoint"], name, policy)
             started = time.monotonic()
@@ -94,7 +110,8 @@ def run(record, policy, reviewer, private_bytes=None):
                 stdout, stderr = bounded_process(command, canonical(challenge)+b"\n",
                     policy["experiment_timeout_seconds"], policy["experiment_output_bytes"])
                 output = parse(stdout, policy["experiment_output_bytes"])
-                valid = verifier.verify(challenge, output)
+                valid = verifier.verify(challenge, output) if experiment.get("kind","attack")=="attack" else None
+                if valid is None:analysis_output(output)
                 results.append({"challenge": challenge, "output": output, "valid": valid,
                     "elapsed_seconds": time.monotonic()-started, "stderr_sha256": sha(stderr)})
             finally:
@@ -105,7 +122,7 @@ def run(record, policy, reviewer, private_bytes=None):
     body = {"kind": "experiment", "reviewer": reviewer,
         "issued_at": datetime.now(timezone.utc).isoformat(), "binding": record["binding"],
         "image": policy["experiment_image"], "results": results,
-        "scope": "Finite uniform full-parameter targets; no production complexity or success bound inferred."}
+        "scope": "Finite execution evidence only; attack results are independently checked, analysis counts are program-reported and require scientific review. No production complexity or success bound inferred."}
     if private_bytes is None:
         # The credential-free execution job emits this body. Only the trusted
         # review job may attest its same-run artifact, after rechecking outputs.
@@ -132,9 +149,17 @@ def validate_body(body, record, policy):
     verifier = Verifier.from_evidence(record)
     for result in body["results"]:
         exact(result, ("challenge", "output", "valid", "elapsed_seconds", "stderr_sha256"))
-        require(type(result["valid"]) is bool and
-                verifier.verify(result["challenge"], result["output"]) == result["valid"],
-                "Organizer verification disagrees with execution report")
+        if record['evidence']['claim']['experiment'].get('kind','attack')=='attack':
+            require(type(result["valid"]) is bool and
+                    verifier.verify(result["challenge"], result["output"]) == result["valid"],
+                    "Organizer verification disagrees with execution report")
+        else:
+            exact(result['challenge'],('track','trial','seed'))
+            require(result['valid'] is None and result['challenge']['track']==record['evidence']['track'],
+                    'Analysis evidence cannot assert a production attack result')
+            integer(result['challenge']['trial'],0,expected-1)
+            require(type(result['challenge']['seed']) is str and HEX.fullmatch(result['challenge']['seed']), 'Invalid experiment seed')
+            analysis_output(result['output'])
         number(result["elapsed_seconds"], 0, policy["experiment_timeout_seconds"]+10)
         require(type(result["stderr_sha256"]) is str and HEX.fullmatch(result["stderr_sha256"]),
                 "Invalid log digest")

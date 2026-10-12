@@ -1,11 +1,8 @@
 # bls12-381-invert-g1
 
-Deterministic baby-step/giant-step baseline package, ready for independent review.
-Success probability: 1 on the specified target. Qualification remains pending.
+Deterministic baby-step/giant-step accounting control, submitted for exploratory review. Success probability is 1 on the specified full target.
 
-- [Proof and complete accounting](proof.md)
-- [Exact resource ledger](ledger.json)
-- [Claim bound to target/cost definitions](claim.json)
+- [Algorithm and cost argument](proof.md)
+- [Submission claim](claim.json)
 
-This is a conservative generic accounting control, not a best-known attack estimate.
-No full-size execution, accepted score or cryptanalytic advance is claimed.
+The authenticated workflow dossier determines qualification. This is not a practical break, best-known attack estimate or cryptanalytic advance.

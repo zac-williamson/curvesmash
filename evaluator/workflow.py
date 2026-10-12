@@ -13,7 +13,7 @@ from .common import (ARTIFACT_BYTES, MAX_BYTES, canonical, digest, exact, parse,
                      read_json, relative, require, sha, write_new)
 from .intake import build_evidence, check_evidence, POLICY, TRACKS
 from .review import aggregate, OBLIGATIONS, score, sign, definitions_binding
-from . import experiments, provider
+from . import experiments, provider, reassessment
 
 ROOT = Path(__file__).resolve().parents[1]
 ROLES = (*OBLIGATIONS, "defender", "adjudicator", "execution")
@@ -85,6 +85,9 @@ def freeze_source(root, source, track, work, source_root=None):
         subprocess.run(["docker", "pull", image], check=True, timeout=180,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         write_new(work / "execution-body.json", experiments.run(record, policy, "execution"))
+    history = reassessment.fetch_history(record, os.environ.get("GH_TOKEN"))
+    if history is not None:
+        write_new(work / "history.json", history)
     write_new(work / "intake-status.json", {"state": "complete", "binding": record["binding"]})
     return provenance
 
@@ -149,6 +152,18 @@ def review_job(root, track, work, output):
             experiment = sign(body, keys["execution"])
             experiments.validate_report(experiment, record, policy)
             write_new(output / "experiment.json", experiment)
+        if reassessment.entry_for(record) is not None:
+            history = read_json(work / "history.json", reassessment.MAX_HISTORY)
+            decision = reassessment.request_reassessment(record, history, policy, keys['cost'], api_key,
+                audit=lambda attempt: write_new(output / 'reassessment-attempt.json', attempt), experiment=experiment)
+            dossier = reassessment.reassessment_dossier(record, history, decision, policy, experiment)
+            write_new(output / 'reassessment.json', decision)
+            write_new(output / 'history.json', history)
+            write_new(output / 'packet.json', {'record':record,'dossier':dossier,
+                'history':history['history']+[history['dossier']]})
+            write_new(output / 'review-status.json', {'binding':record['binding'],'errors':[],
+                'review_count':0,'challenge_count':0,'challenge_provenance':[]})
+            return 0
         # Independent initial calls. No earlier verdict appears in a later prompt.
         for role in OBLIGATIONS:
             try:
@@ -158,7 +173,7 @@ def review_job(root, track, work, output):
                 reviews.append(result)
             except (ValueError, OSError, KeyError, TypeError) as exc:
                 errors.append({"stage": role, "error": type(exc).__name__})
-        findings = [(r, f) for r in reviews for f in r["body"]["findings"] if f["severity"] != "note"]
+        findings = [(r, f) for r in reviews for f in r["body"]["findings"] if f["severity"] == "fatal"]
         require(len(findings) <= 16, "Challenge call budget exceeded; owner follow-up required")
         for index, (review, finding) in enumerate(findings):
             try:
@@ -182,6 +197,10 @@ def review_job(root, track, work, output):
         # Names of missing configuration are safe; never preserve exception bodies/credentials.
         code = "missing_provider_key" if not os.environ.get("OPENROUTER_API_KEY") else "review_configuration_or_protocol"
         errors.append({"stage": "provisioning", "error": type(exc).__name__, "code": code})
+    packet_dossier=aggregate(record, reviews, challenges, experiment=experiment)
+    packet_dossier['scoring_policy']=reassessment.scoring_policy(record)
+    packet_dossier['score']=record['evidence']['claim']['claim']['time_log2'] if packet_dossier['outcome']=='plausible_not_refuted' and not errors else None
+    write_new(output / 'packet.json', {'record':record,'dossier':packet_dossier, 'history':[]})
     write_new(output / "review-status.json", {"binding": record["binding"], "errors": errors,
         "review_count": len(reviews), "challenge_count": len(challenges), "challenge_provenance": provenance})
     return 1 if errors else 0
@@ -199,15 +218,13 @@ def score_job(root, track, work, reviews_dir, output, destination=None):
     require(status["review_count"] == len(reviews) and status["challenge_count"] == len(challenges),
             "Incomplete review artifact")
     experiment = read_json(reviews_dir / "experiment.json") if record["evidence"]["experiment_required"] else None
-    # Approval is protected organizer data, never participant-supplied or an AI verdict.
-    approval_file = root / "evaluation/definitions-approval.json"
-    approval = read_json(approval_file) if approval_file.exists() else None
-    public_receipt = os.environ.get("CURVESMASH_DEFINITION_APPROVAL")
-    if public_receipt:
-        supplied = parse(public_receipt)
-        require(approval is None or supplied == approval, "Conflicting organizer approvals")
-        approval = supplied  # aggregate authenticates the signature and exact definition binding.
-    dossier = aggregate(record, reviews, challenges, approval, experiment)
+    if reassessment.entry_for(record) is not None:
+        history = read_json(reviews_dir / 'history.json', reassessment.MAX_HISTORY)
+        dossier = reassessment.reassessment_dossier(record, history,
+            read_json(reviews_dir / 'reassessment.json'), policy, experiment)
+    else:
+        require(not (reviews_dir / 'reassessment.json').exists(), 'Unpinned reassessment refused')
+        dossier = aggregate(record, reviews, challenges, experiment=experiment)
     write_new(output / "dossier.json", dossier)
     write_new(output / "qualification.json", {"binding": record["binding"], "outcome": dossier["outcome"],
         "infrastructure_errors": status["errors"], "definition_binding": definitions_binding(record["evidence"]),
@@ -217,9 +234,18 @@ def score_job(root, track, work, reviews_dir, output, destination=None):
     if status["errors"]:
         print("Review infrastructure incomplete; no score emitted.")
         return 1
-    if dossier["outcome"] != "qualified":
+    if dossier["outcome"] != "plausible_not_refuted":
         return 2
-    result = score(record, dossier)
+    if 'reassessment' in dossier:
+        bounds = record['evidence']['claim']['claim']
+        result = {'score':dossier['score'],'timeLog2':dossier['score'],'binding':record['binding'],
+            'dossier_sha256':digest(dossier),'track':track,'claim_kind':dossier['claim_kind'],
+            'memoryLog2Bytes':bounds['memory_log2_bytes'],'promotionMode':'manual',
+            'policy':dossier['policy'],'timeUnit':bounds['time_unit'],
+            'rescoreMode':'preserved' if dossier['scoring_policy_unchanged'] else 'revised',
+            'previous_packet_sha256':dossier['previous_packet_sha256']}
+    else:
+        result = score(record, dossier)
     score_path = ".yukon/scores/"+track+".json"
     write_new(root / score_path, result)
     if destination is not None:

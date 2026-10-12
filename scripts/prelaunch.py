@@ -39,20 +39,20 @@ def relative_path(value):
 
 def validate(root=ROOT):
     manifest = read_json(root / "benchmark.json")
-    profiles = read_json(root / "target-profiles/production-v1.json")
-    cost = read_json(root / "cost-models/classical-word-ram-v1.json")
+    profiles = read_json(root / "target-profiles/production-v2.json")
+    cost = read_json(root / "cost-models/classical-group-work-v2.json")
     if manifest.get("schemaVersion") != 2 or manifest.get("name") != "curvesmash":
         raise ValueError("Wrong manifest identity or schema")
     if any(spec.get("state") != "specified" or spec.get("scientific_review") != "pending"
            for spec in (profiles, cost)):
         raise ValueError("This scaffold cannot assert scientific qualification")
-    if profiles.get("cost_model") != cost.get("id") or cost.get("id") != "classical-word-ram-v1":
+    if profiles.get("cost_model") != cost.get("id") or cost.get("id") != "classical-group-work-v2":
         raise ValueError("Target and cost model versions differ")
     if cost.get("metric") != "time_log2" or cost.get("direction") != "-":
         raise ValueError("Changed headline metric")
     if cost.get("success_probability_minimum") != 0.39:
         raise ValueError("Changed success contract")
-    if cost.get("word_bits") != 256 or cost.get("time_unit") != "word-operations":
+    if cost.get("word_bits") != 256 or cost.get("time_unit") != "target-group-operations":
         raise ValueError("Changed computation units")
     targets = profiles["targets"]
     if len(targets) != 2 or {t["id"] for t in targets} != TARGETS:
@@ -82,8 +82,7 @@ def validate(root=ROOT):
         relative_path(expected_score)
         if (root / expected_score).exists() or (root / expected_score).is_symlink():
             raise ValueError("A prelaunch scaffold cannot contain leaderboard scores")
-        if track.get("benchmarkCommand") != [".venv/bin/python", "-m", "evaluator.workflow", "score",
-                                                "--track", name, "--work", ".yukon/reports/"+name]:
+        if track.get("benchmarkCommand") != [".venv/bin/python", "scripts/run_local.py", "--track", name]:
             raise ValueError("Wrong protected evaluation command")
         if track.get("runner") != {"provider": "github-actions", "workflow": name+".yml",
                                     "maxConcurrentWorkflows": 2}:
@@ -93,7 +92,7 @@ def validate(root=ROOT):
 
 def readiness_errors(profiles, cost):
     # No status field or participant claim can enable scoring in this scaffold.
-    errors = ["Qualification requires bound live reviews and organizer approval of the protected release.",
+    errors = ["Qualification requires bound live exploratory reviews.",
               "Yukon registration and manual promotion have not been verified."]
     return errors
 

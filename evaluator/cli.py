@@ -78,7 +78,7 @@ def main(argv=None):
                 read_json(args.definition_approval) if args.definition_approval else None, experiment)
             write_new(args.output, dossier)
             print(dossier["outcome"]+": "+str(len(dossier["blockers"]))+" outstanding gates; no score emitted.")
-            return 0 if dossier["outcome"] == "qualified" else 2
+            return 0 if dossier["outcome"] == "plausible_not_refuted" else 2
         elif args.command == "score":
             require(not os.environ.get("OPENROUTER_API_KEY"), "Scoring must run without provider credentials")
             result = score(record, read_json(args.dossier))

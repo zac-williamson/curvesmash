@@ -74,14 +74,13 @@ class Workflow(unittest.TestCase):
         self.assertEqual(report['infrastructure_errors'][0]['code'], 'missing_provider_key')
         self.assertFalse((self.root / '.yukon/scores').exists())
 
-    def test_live_reviews_cannot_substitute_for_definition_approval(self):
+    def test_live_exploratory_reviews_need_no_extra_scientific_approval(self):
         self.initialize()
         self.run_reviews()
-        with patch.dict(os.environ, {}, clear=True):
-            self.assertEqual(workflow.score_job(self.root, TRACK, self.work, self.output, self.result), 2)
-        self.assertIn('Protected definitions/evaluator lack scientific approval',
-                      common.read_json(self.result / 'dossier.json')['blockers'])
-        self.assertFalse((self.root / '.yukon/scores').exists())
+        self.assertEqual(workflow.score_job(self.root, TRACK, self.work, self.output, self.result), 0)
+        dossier = common.read_json(self.result/'dossier.json')
+        self.assertIsNone(dossier['definition_approval'])
+        self.assertEqual(dossier['outcome'], 'plausible_not_refuted')
 
     def test_protected_changes_sibling_changes_and_symlinks_refused(self):
         self.initialize()
@@ -149,7 +148,7 @@ class Workflow(unittest.TestCase):
             self.keys['adjudicator'], 'fixture-key', defense, transport=transport)
         dossier = review.aggregate(self.record, records, [{'defense':defense,'adjudication':adjudication}],
                                    self.approval())
-        self.assertEqual(dossier['outcome'], 'qualified')
+        self.assertEqual(dossier['outcome'], 'plausible_not_refuted')
         self.assertEqual(meta['record_sha256'], common.digest(defense))
         self.assertEqual(meta['model'], 'vendor/exact-model')
 
