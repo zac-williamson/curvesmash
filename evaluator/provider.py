@@ -146,9 +146,12 @@ def completion(config, model, messages, schema, api_key, transport=None, audit=N
             with opener.open(req, timeout=config["timeout_seconds"]) as response:
                 result = parse(response.read(1024*1024+1), 1024*1024)
         except urllib.error.HTTPError as exc:
-            if audit is not None:
-                audit({"requested_model": model, "prompt_sha256": digest({"messages": messages, "schema": schema}),
-                       "transport_failure": {"kind": "http", "status": exc.code}})
+            try:
+                if audit is not None:
+                    audit({"requested_model": model, "prompt_sha256": digest({"messages": messages, "schema": schema}),
+                           "transport_failure": {"kind": "http", "status": exc.code}})
+            finally:
+                exc.close()
             raise ValueError("Review provider request failed") from None
         except (urllib.error.URLError, OSError):
             # Never include provider error bodies, request headers, or credentials in reports.
