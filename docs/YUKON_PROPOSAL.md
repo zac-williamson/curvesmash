@@ -12,4 +12,6 @@ Submissions describe the attack, justify its success probability and explain all
 
 ## Integration
 
+Both baseline workflows have completed live qualification under the current rules. Scores, signed reviews and earlier attempts are preserved in the [public release](https://github.com/zac-williamson/curvesmash/releases/tag/v0.2.0); the [qualification record](BASELINE_QUALIFICATION.md) describes the results and their limits.
+
 Please grant production benchmark-owner/import access, install the production GitHub App and import both tracks from the root manifest with submissions initially closed. We need to verify baseline runs, score-artifact ingestion, protected candidate paths and the manual promotion lifecycle before opening. No website or production import is claimed by this application.
