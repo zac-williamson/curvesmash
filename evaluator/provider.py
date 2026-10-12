@@ -30,15 +30,26 @@ the argument needs no empirical assumptions. Do not demand irrelevant full-scale
 proof where ordinary cryptanalytic standards accept explicitly justified heuristics.
 Each fatal finding will receive defense/adjudication. Do not suppress objections or invent counterexamples.
 Output exactly the requested JSON schema, no Markdown. Reconstruct submitted costs only in the cost role.
+Cite the exact source path and original line range from the numbered sources. File hashes are supplied
+by the organizer after you select a source; do not copy hashes into your response. Never invent lines.
 """
 
 
-def response_schema(role):
+def response_schema(role, record=None):
     citation = {"type": "object", "additionalProperties": False,
-        "properties": {"path": {"type": "string"}, "sha256": {"type": "string"},
+        "properties": {"path": {"type": "string"},
                        "lines": {"type": "array", "items": {"type": "integer"},
                                  "minItems": 2, "maxItems": 2}},
-        "required": ["path", "sha256", "lines"]}
+        "required": ["path", "lines"]}
+    # Cryptographic checksums are transport metadata, not a language-model task.
+    if record is not None:
+        citation = {"anyOf": [{"type": "object", "additionalProperties": False,
+            "properties": {"path": {"type": "string", "enum": [path]},
+                "lines": {"type": "array", "minItems": 2, "maxItems": 2,
+                    "items": {"type": "integer", "minimum": 1,
+                              "maximum": len(file["text"].splitlines())}}},
+            "required": ["path", "lines"]} for path, file in record["evidence"]["files"].items()
+            if file["text"].splitlines()]}
     def assessment(status):
         return {"type": "object", "additionalProperties": False,
             "properties": {"id": {"type": "string"}, "status": {"type": "string", "enum": status},
@@ -78,14 +89,17 @@ def request_review(record, role, policy, reviewer, private_bytes, api_key, exper
     initial(sign(template(record, role, reviewer, experiment), private_bytes),
             record["evidence"], record["binding"], policy)
     text(api_key, 4096)
-    schema = response_schema(role)
-    user = {"role": role, "obligation_ids": OBLIGATIONS[role], "evidence": record,
+    schema = response_schema(role, record)
+    user = {"role": role, "obligation_ids": OBLIGATIONS[role], "evidence": source_view(record),
             "execution_report": experiment}
     messages = [{"role": "system", "content": SYSTEM},
                 {"role": "user", "content": canonical(user).decode()}]
     prompt_hash = digest({"messages": messages, "schema": schema})
     content, request_id = completion(config, model, messages, schema, api_key, transport, audit)
     exact(content, ("obligations", "heuristics", "findings", "reconstruction"))
+    for collection in ("obligations", "heuristics", "findings"):
+        for item in content[collection]:
+            bind_citations(item, record)
     body = template(record, role, reviewer, experiment)
     body.update(content)
     body["issued_at"] = datetime.now(timezone.utc).isoformat()
@@ -94,6 +108,26 @@ def request_review(record, role, policy, reviewer, private_bytes, api_key, exper
     signed = sign(body, private_bytes)
     initial(signed, record["evidence"], record["binding"], policy)
     return signed
+
+
+def source_view(record):
+    evidence = check_evidence(record)
+    return {"binding": record["binding"], "track": evidence["track"], "claim": evidence["claim"],
+        "runtime": evidence["runtime"], "experiment_required": evidence["experiment_required"],
+        "sources": {path: {"sha256": file["sha256"], "line_count": len(file["text"].splitlines()),
+            "numbered_text": "\n".join(str(i)+": "+line for i, line in enumerate(file["text"].splitlines(), 1))}
+            for path, file in evidence["files"].items()}}
+
+
+def bind_citations(item, record):
+    from .review import cite
+    require(type(item["citations"]) is list, "Missing citations")
+    for citation in item["citations"]:
+        exact(citation, ("path", "lines"))
+        require(citation["path"] in record["evidence"]["files"], "Citation outside bound sources")
+        citation["sha256"] = record["evidence"]["files"][citation["path"]]["sha256"]
+    # Verify the actual selected range; never clip, substitute or repair it.
+    cite(item["citations"], record["evidence"])
 
 
 def completion(config, model, messages, schema, api_key, transport=None, audit=None):
@@ -111,8 +145,16 @@ def completion(config, model, messages, schema, api_key, transport=None, audit=N
         try:
             with opener.open(req, timeout=config["timeout_seconds"]) as response:
                 result = parse(response.read(1024*1024+1), 1024*1024)
-        except (urllib.error.HTTPError, urllib.error.URLError) as exc:
+        except urllib.error.HTTPError as exc:
+            if audit is not None:
+                audit({"requested_model": model, "prompt_sha256": digest({"messages": messages, "schema": schema}),
+                       "transport_failure": {"kind": "http", "status": exc.code}})
+            raise ValueError("Review provider request failed") from None
+        except (urllib.error.URLError, OSError):
             # Never include provider error bodies, request headers, or credentials in reports.
+            if audit is not None:
+                audit({"requested_model": model, "prompt_sha256": digest({"messages": messages, "schema": schema}),
+                       "transport_failure": {"kind": "network"}})
             raise ValueError("Review provider request failed") from None
     if audit is not None:
         # Preserve completed attempts, including invalid/truncated answers. No
@@ -145,7 +187,7 @@ def request_challenge(record, review, finding, role, policy, private_bytes, api_
             "review_sha256": digest(review), "finding_id": finding["id"]}
     # Validate authority before spending tokens. No synthetic scientific decision.
     verify(sign(base, private_bytes), policy, role, record["binding"])
-    citation = response_schema("evaluability")["properties"]["findings"]["items"]["properties"]["citations"]
+    citation = response_schema("evaluability", record)["properties"]["findings"]["items"]["properties"]["citations"]
     properties = {"reason": {"type": "string"}, "citations": citation}
     instruction = "Explain the strongest evidence-based defense of this objection. Concede real gaps."
     if role == "adjudicator":
@@ -161,12 +203,12 @@ def request_challenge(record, review, finding, role, policy, private_bytes, api_
     schema = {"type": "object", "additionalProperties": False,
               "properties": properties, "required": list(properties)}
     messages = [{"role": "system", "content": SYSTEM+"\n"+instruction},
-        {"role": "user", "content": canonical({"evidence": record, "initial_review": review,
+        {"role": "user", "content": canonical({"evidence": source_view(record), "initial_review": review,
             "finding": finding, "defense": defense, "execution_report": experiment}).decode()}]
     content, request_id = completion(config, model, messages, schema, api_key, transport, audit)
     exact(content, properties)
     text(content["reason"])
-    cite(content["citations"], record["evidence"])
+    bind_citations(content, record)
     body = dict(base, kind="defense" if role == "defender" else "adjudication", **content)
     if role == "adjudicator":
         body["defense_sha256"] = digest(defense)

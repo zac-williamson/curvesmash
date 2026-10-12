@@ -138,7 +138,7 @@ class Workflow(unittest.TestCase):
         finding = original['body']['findings'][0]
         def transport(payload):
             self.assertNotIn('fixture-key', common.canonical(payload).decode())
-            content = {'reason': 'Synthetic defense fixture only.', 'citations': finding['citations']}
+            content = {'reason': 'Synthetic defense fixture only.', 'citations': [{k:v for k,v in c.items() if k!='sha256'} for c in finding['citations']]}
             if 'Adjudicate' in payload['messages'][0]['content']:
                 content.update(decision='dismissed', discharged_obligations=['correctness'])
             return {'model':'vendor/exact-model','id':'fixture-request','choices':[{

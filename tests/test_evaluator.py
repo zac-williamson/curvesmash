@@ -342,6 +342,9 @@ class Evaluation(unittest.TestCase):
         record = intake.build_evidence(self.root, TRACK)
         template = review.template(record, "evaluability", "evaluability")
         content = {k: template[k] for k in ("obligations", "heuristics", "findings", "reconstruction")}
+        for obligation in content["obligations"]:
+            for citation in obligation["citations"]:
+                citation.pop("sha256", None)
         def transport(payload):
             self.assertNotIn("tools", payload)
             self.assertNotIn("api-key-fixture", common.canonical(payload).decode())
