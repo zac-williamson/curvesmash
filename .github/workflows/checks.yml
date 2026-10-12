@@ -14,7 +14,8 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install hash-locked organizer dependencies
-        run: python -m pip install --require-hashes --only-binary=:all: -r requirements.lock
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r requirements.lock
       - name: Pull immutable organizer test image
         run: docker pull python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1
       - name: Verify acceptance, review and isolation failure paths
