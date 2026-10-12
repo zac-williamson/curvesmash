@@ -8,7 +8,7 @@ Curvesma.sh is an AI-assisted cryptanalysis challenge with two production target
 
 ## Evaluation
 
-The evaluator is implemented: mathematical output checks, isolated experiments, authenticated cryptanalysis/cost review and evidence-bound scoring. Scores include preprocessing and require a qualifying review; owner approval is required before promotion. These are reviewed full-size complexity claims, not claims of practical full-size attack execution. Versioned target/cost specifications and two conservative generic baseline proposals are written. Scientific review, judge calibration, starting baseline qualification and production deployment remain outstanding. The initial baselines need not be best-known attacks; generic controls require full accounting and qualifying review and will be labeled accordingly. Local and Linux CI checks pass; no baseline has been qualified or scored.
+The evaluator is implemented: mathematical output checks, isolated experiments, authenticated cryptanalysis/cost review and evidence-bound scoring. Scores include preprocessing and require a qualifying review; owner approval is required before promotion. Both initial baselines have passed live AI reviews and emitted verified scores: 155.218461 for secp256k1 and 153.944862 for BLS12-381 inversion. They are fully accounted generic controls, not practical attacks or best-known estimates. See the [qualification record](BASELINE_QUALIFICATION.md). Independent human cryptanalytic validation, judge calibration and Yukon integration remain outstanding. Local and Linux CI checks pass.
 
 ## Integration
 

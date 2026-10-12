@@ -28,7 +28,7 @@ Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/mai
 
 ## Current status
 
-Private prelaunch project. Version 1 specifications, two analytic baseline packages and the [evaluator](docs/EVALUATION.md) are implemented. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls awaiting qualification, not best-known attack estimates. The separated execution workflow, review identities, provider model and experiment image are provisioned. Live baseline qualification, organizer approval, Yukon import and the website remain outstanding. Nothing is open or scored.
+Private prelaunch project. Both deterministic baby-step/giant-step baselines passed the live AI reviews and emitted verified scores on October 12, 2026, after organizer approval of the scoring rules. The secp256k1 score is **155.218461**; BLS12-381 inversion is **153.944862**. These are conservative accounting controls with success probability 1, not best-known attack estimates or practical breaks. See the [qualification record](docs/BASELINE_QUALIFICATION.md) for the exact release, runs and evidence. Independent human cryptanalytic validation, judge calibration, Yukon import and the website remain outstanding. Submissions remain closed.
 
 - [secp256k1 baseline](candidates/secp256k1-ecdlp/README.md)
 - [BLS12-381 inversion baseline](candidates/bls12-381-invert-g1/README.md)
