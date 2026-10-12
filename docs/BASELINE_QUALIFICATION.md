@@ -22,6 +22,6 @@ Live reassessment checks also passed for [secp256k1](https://github.com/zac-will
 
 The source passed all 80 tests in [CI](https://github.com/zac-williamson/curvesmash/actions/runs/38266286174), including actual container execution and acceptance, signature, isolation and reassessment failure paths. This checks implementation behavior, not a measured scientific error rate for the judge.
 
-Yukon benchmark-owner/import access is still pending. The repository and evidence are public, but the challenge is not yet registered and submissions are not open. There is no live domain deployment.
+Yukon benchmark-owner/import access is still pending. The repository and evidence are public, but the challenge is not yet registered and submissions are not open. A standalone website is now deployed as an [owner-private preview](https://curvesmash.zac342230.chatgpt.site); [domain verification and public launch](../website/LAUNCH.md) remain pending.
 
 The [version 1 record](archive/BASELINE_QUALIFICATION_V1.md) is retained as history. Its word-operation scores and stricter policy are retired and cannot be presented as current results. No new cryptanalytic attack is claimed by the change in policy or units.

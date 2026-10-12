@@ -15,6 +15,8 @@ Both tracks follow HashSmash's exploratory standard: a concrete, supported claim
 
 The repository is public. Version 2 replaces the original stricter review policy and mandatory ledger with HashSmash-style exploratory review and prose accounting. Both baselines passed live qualification: **129.000802** for secp256k1 and **128.494762** for BLS12-381. The [qualification record](docs/BASELINE_QUALIFICATION.md) links the runs; the [public release](https://github.com/zac-williamson/curvesmash/releases/tag/v0.2.0) preserves source, signed reviews, scores and earlier attempts. The standard baby-step/giant-step candidates are conservative accounting controls, not best-known attack estimates. The version 1 scores remain [historical records](docs/archive/BASELINE_QUALIFICATION_V1.md); they cannot be relabeled in the new units. Yukon owner/import access is still pending; submissions are not open.
 
+The [website](website/README.md) is built and deployed as an [owner-private preview](https://curvesmash.zac342230.chatgpt.site). It follows HashSmash's presentation and displays the verified baselines. The [launch instructions](website/LAUNCH.md) contain the actual curvesma.sh DNS records; domain verification and public access are still pending.
+
 Organizers: [execution and access](docs/EXECUTION.md), [reassessment and history](docs/RESCORING.md), [Yukon proposal](docs/YUKON_PROPOSAL.md).
 
 ```sh
