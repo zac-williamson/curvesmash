@@ -1,0 +1,144 @@
+name: Bound cryptanalysis qualification
+on:
+  workflow_call:
+    inputs:
+      track:
+        required: true
+        type: string
+    secrets:
+      OPENROUTER_API_KEY:
+        required: false
+      CURVESMASH_REVIEW_SIGNING_KEYS:
+        required: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  intake:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      trusted_sha: ${{ steps.release.outputs.sha }}
+    steps:
+      - name: Require immutable organizer release
+        id: release
+        env:
+          TRUSTED_SHA: ${{ vars.CURVESMASH_TRUSTED_SHA }}
+        run: |
+          [[ "$TRUSTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Configure CURVESMASH_TRUSTED_SHA'; exit 1; }
+          echo "sha=$TRUSTED_SHA" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.release.outputs.sha }}
+          path: organizer
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: submission
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install trusted environment
+        working-directory: organizer
+        run: bash .yukon/setup.sh
+      - name: Freeze candidate and run isolated experiments
+        working-directory: organizer
+        env:
+          TRACK: ${{ inputs.track }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          .venv/bin/python -m evaluator.workflow intake --track "$TRACK" --source "$SOURCE_SHA" --source-root ../submission --work "$RUNNER_TEMP/intake"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: curvesmash-intake-${{ inputs.track }}
+          path: ${{ runner.temp }}/intake/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+  review:
+    needs: intake
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.intake.outputs.trusted_sha }}
+          path: organizer
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install trusted environment
+        working-directory: organizer
+        run: bash .yukon/setup.sh
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: curvesmash-intake-${{ inputs.track }}
+          path: ${{ runner.temp }}/intake
+      - name: Independent reviews and finding-specific defense/adjudication
+        working-directory: organizer
+        env:
+          TRACK: ${{ inputs.track }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          CURVESMASH_REVIEW_SIGNING_KEYS: ${{ secrets.CURVESMASH_REVIEW_SIGNING_KEYS }}
+        run: |
+          .venv/bin/python -m evaluator.workflow review --track "$TRACK" --work "$RUNNER_TEMP/intake" --output "$RUNNER_TEMP/reviews"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: curvesmash-review-${{ inputs.track }}
+          path: ${{ runner.temp }}/reviews/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+  score:
+    needs: [intake, review]
+    if: ${{ always() && needs.intake.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.intake.outputs.trusted_sha }}
+          path: organizer
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - name: Install trusted environment
+        working-directory: organizer
+        run: bash .yukon/setup.sh
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: curvesmash-intake-${{ inputs.track }}
+          path: ${{ runner.temp }}/intake
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: curvesmash-review-${{ inputs.track }}
+          path: ${{ runner.temp }}/reviews
+      - name: Reconstruct qualification and emit score only on acceptance
+        id: qualification
+        working-directory: organizer
+        env:
+          TRACK: ${{ inputs.track }}
+        run: |
+          .venv/bin/python -m evaluator.workflow score --track "$TRACK" --work "$RUNNER_TEMP/intake" --reviews "$RUNNER_TEMP/reviews" --output "$RUNNER_TEMP/qualification" --destination "$RUNNER_TEMP/yukon-score"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: curvesmash-qualification-${{ inputs.track }}
+          path: ${{ runner.temp }}/qualification/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ success() && steps.qualification.outcome == 'success' }}
+        with:
+          name: benchmark-score-${{ inputs.track }}
+          path: ${{ runner.temp }}/yukon-score/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30

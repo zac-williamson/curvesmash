@@ -1,0 +1,17 @@
+name: bls12-381-invert-g1
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: curvesmash-bls12-381-invert-g1-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  qualify:
+    uses: ./.github/workflows/qualification.yml
+    with:
+      track: bls12-381-invert-g1
+    secrets:
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      CURVESMASH_REVIEW_SIGNING_KEYS: ${{ secrets.CURVESMASH_REVIEW_SIGNING_KEYS }}

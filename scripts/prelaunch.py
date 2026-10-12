@@ -82,18 +82,19 @@ def validate(root=ROOT):
         relative_path(expected_score)
         if (root / expected_score).exists() or (root / expected_score).is_symlink():
             raise ValueError("A prelaunch scaffold cannot contain leaderboard scores")
-        if track.get("benchmarkCommand") != ["python3", "scripts/prelaunch.py",
-                                                "--track", name, "--require-ready"]:
-            raise ValueError("Production evaluation is not implemented")
+        if track.get("benchmarkCommand") != [".venv/bin/python", "-m", "evaluator.workflow", "score",
+                                                "--track", name, "--work", ".yukon/reports/"+name]:
+            raise ValueError("Wrong protected evaluation command")
+        if track.get("runner") != {"provider": "github-actions", "workflow": name+".yml",
+                                    "maxConcurrentWorkflows": 2}:
+            raise ValueError("Wrong track runner binding")
     return manifest, profiles, cost
 
 
 def readiness_errors(profiles, cost):
     # No status field or participant claim can enable scoring in this scaffold.
-    errors = ["Evaluator is implemented; production review identities, model configuration and scientific approval are not provisioned.",
-              "Live Yukon registration, separated runner jobs, baseline jobs and manual promotion have not been verified.",
-              "Scientific review committee and held-out calibration are not established."]
-    errors.append("Versioned target/cost definitions need independent scientific review; both baselines remain unqualified.")
+    errors = ["Qualification requires bound live reviews and organizer approval of the protected release.",
+              "Yukon registration and manual promotion have not been verified."]
     return errors
 
 

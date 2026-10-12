@@ -1,0 +1,28 @@
+# Yukon execution
+
+Two dispatch workflows implement the manifest's GitHub Actions runner contract:
+`secp256k1-ecdlp.yml` and `bls12-381-invert-g1.yml`. Each calls `qualification.yml`.
+
+1. **Intake:** check out the pinned organizer release and dispatched submission separately. Compare Git trees, rejecting changes outside the selected candidate directory, including sibling tracks. Read candidate blobs as inert data. Bind all candidate bytes, specifications, policy, dependencies, evaluator, setup scripts and workflows. Run any declared experiment on a fresh credential-free worker in bounded containers; these baselines need no experiments.
+2. **Review:** check out the same organizer release and download this run/attempt's intake artifact. Only the review step receives `OPENROUTER_API_KEY` and service signing keys. Make four independent initial requests with no earlier verdict in their prompts. Material findings receive separate defense and adjudication requests, preserving the initial objection and every completed response. Refuse more than sixteen challenged findings in one run; owner follow-up is required. No automatic retries or selection of favorable verdicts.
+3. **Score:** a separate worker receives no provider or signing credentials. Rebuild evidence against the trusted release, verify review signatures and finding resolutions, and reconstruct qualification. Preserve the dossier even when qualification fails. Emit a score only after all obligations and the separate organizer definition approval pass.
+
+The final score contains numeric `score` and `timeLog2` fields with equal values. The artifact is named `benchmark-score-<track>` and contains the exact manifest-relative `.yukon/scores/<track>.json`. Memory is supplementary; promotion remains manual.
+
+## Provisioning
+
+- Repository secret `OPENROUTER_API_KEY`: paid review-provider credential, never a Yukon token. Only the review step receives it.
+- Repository secret `CURVESMASH_REVIEW_SIGNING_KEYS`: seven role-specific service keys. Public authorities are in `evaluation/policy-v1.json`. `scripts/provision_reviews.py --key-directory <protected-directory-outside-repo>` creates or reuses mode-600 private files. It never issues approval. The separate definition key must stay local with the organizer; do not upload it as an Actions secret.
+- Repository variable `CURVESMASH_TRUSTED_SHA`: full immutable commit of the organizer release. Update only after reviewing and checking that release. A submission's protected files must match it exactly. A changed release requires fresh bound qualification.
+- Models: the protected policy pins `openai/gpt-5.6-sol`, matching HashSmash's documented default, with high reasoning and no model fallback. Initial roles use separate calls and signing keys but the same model; signatures do not establish statistical independence or scientific truth.
+- Organizer approval: `evaluation/definitions-approval.json` is a signed receipt for `definitions_binding(evidence)`, after actual human review of that exact release. It is deliberately excluded from its own binding. An AI review, key generation, or successful workflow cannot create this approval.
+
+Dispatch the selected workflow on the exact source commit after CI passes. Record its source and organizer commits, candidate hash, evidence binding, run/attempt, artifact IDs and digests, dossier and actual outcome. GitHub artifacts are retained for 30 days; export them to a durable public archive before opening submissions. They are private while the repository is private.
+
+The same-run artifact service is the transport authority for unsigned intake/execution bodies. The review job attests an execution body only after rechecking its binding and outputs. Never accept uploaded participant reports as that transport. Yukon must enforce the manifest editable surface before dispatch, including protecting the workflow files themselves; a repository check cannot secure a malicious replacement workflow that already received secrets.
+
+## Local checks and Yukon onboarding
+
+`bash .yukon/setup.sh` creates the hash-locked environment. Run `.venv/bin/python -m unittest discover -s tests -v`; set `CURVESMASH_TEST_IMAGE` to the pinned Docker image for the live isolation test. Tests use synthetic approvals exclusively in temporary directories.
+
+Qualification workflows can run before Yukon import. Yukon's public onboarding route is https://www.yukon.org/create. Request production import of `zac-williamson/curvesmash`, GitHub App installation, and owner access for manual promotion, initially with submissions closed. The solver CLI's configured token is not evidence of import authorization. The onboarding form itself is not an import. After registration, verify actual Yukon baseline jobs, artifact ingestion, protected-path enforcement and manual promotion before admitting submissions.

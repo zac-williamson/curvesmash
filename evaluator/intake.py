@@ -143,6 +143,11 @@ def build_evidence(root, track, candidate=None):
     protected = [PROFILE, COST, POLICY, "requirements.lock", "benchmark.json"]
     protected += sorted(p.relative_to(root).as_posix() for p in
                         (root / "evaluator").glob("*.py"))
+    protected += sorted(p.relative_to(root).as_posix() for p in
+                        (root / "scripts").glob("*.py"))
+    protected += sorted(p.relative_to(root).as_posix() for p in
+                        (root / ".github/workflows").glob("*.yml"))
+    protected += [".yukon/setup.sh"]
     for path in protected:
         data = read_file(root / path)
         files[path] = {"sha256": sha(data), "text": data.decode("utf-8")}
@@ -238,8 +243,8 @@ def validate_policy(policy):
     require(provider["endpoint"] == "https://openrouter.ai/api/v1/chat/completions",
             "Invalid organizer provider endpoint")
     require(type(provider["models"]) is dict and set(provider["models"]) <=
-            {"evaluability", "cryptanalysis", "cost", "experiments"}, "Invalid provider roles")
+            {"evaluability", "cryptanalysis", "cost", "experiments", "defender", "adjudicator"}, "Invalid provider roles")
     for model in provider["models"].values():
         text(model, 256)
-    integer(provider["timeout_seconds"], 1, 60)
+    integer(provider["timeout_seconds"], 1, 600)
     integer(provider["max_tokens"], 1024, 16000)

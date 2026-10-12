@@ -71,6 +71,6 @@ Pass the signed report using `--experiment` to every template/review/qualify cal
 
 ## Before opening submissions
 
-The code is implemented and tested, but production keys, models, image and scientific approval are deliberately unprovisioned. CI uses synthetic organizer fixtures; its successful approvals are temporary test data, never baseline qualification or measurements of AI judge quality.
+The code, separated execution jobs, service identities, exact review model and experiment image are provisioned; see [EXECUTION.md](EXECUTION.md). Organizer approval and live baseline qualification are still pending. CI uses synthetic organizer fixtures; its successful approvals are temporary test data, never baseline qualification or measurements of AI judge quality.
 
 Required work for our launch policy: scientific approval of definitions, verifiers and cost accounting; blinded human-labeled judge calibration with held-out errors reported; qualifying live review of a starting baseline for each track; separated trusted Yukon jobs and manual promotion verified; public evidence archiving and the two-row results page. This policy must be distinguished from Yukon's platform requirements. A fully accounted generic control is eligible for initial qualification, consistent with HashSmash; selecting best-known reference attacks is separate research work. Both current packages remain unqualified generic controls. Beating them alone is not a cryptanalytic advance.

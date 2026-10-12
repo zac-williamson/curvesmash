@@ -293,7 +293,8 @@ def score(record, dossier):
                         dossier["definition_approval"], dossier["experiment"])
     require(rebuilt == dossier and rebuilt["outcome"] == "qualified", "Dossier does not qualify")
     claim = record["evidence"]["claim"]["claim"]
-    return {"timeLog2": log2_upper(int(claim["work_budget_word_operations"])),
+    value = log2_upper(int(claim["work_budget_word_operations"]))
+    return {"score": value, "timeLog2": value,
             "binding": record["binding"], "dossier_sha256": digest(dossier),
             "track": rebuilt["track"], "claim_kind": rebuilt["claim_kind"],
             "memoryLog2Bytes": claim["memory_log2_bytes"], "promotionMode": "manual"}

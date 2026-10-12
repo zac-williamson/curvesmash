@@ -16,14 +16,22 @@
         ".yukon/setup.sh"
       ],
       "benchmarkCommand": [
-        "python3",
-        "scripts/prelaunch.py",
+        ".venv/bin/python",
+        "-m",
+        "evaluator.workflow",
+        "score",
         "--track",
         "secp256k1-ecdlp",
-        "--require-ready"
+        "--work",
+        ".yukon/reports/secp256k1-ecdlp"
       ],
       "scorePath": ".yukon/scores/secp256k1-ecdlp.json",
-      "maxSubmissionBytes": 4194304
+      "maxSubmissionBytes": 4194304,
+      "runner": {
+        "provider": "github-actions",
+        "workflow": "secp256k1-ecdlp.yml",
+        "maxConcurrentWorkflows": 2
+      }
     },
     {
       "name": "bls12-381-invert-g1",
@@ -39,14 +47,22 @@
         ".yukon/setup.sh"
       ],
       "benchmarkCommand": [
-        "python3",
-        "scripts/prelaunch.py",
+        ".venv/bin/python",
+        "-m",
+        "evaluator.workflow",
+        "score",
         "--track",
         "bls12-381-invert-g1",
-        "--require-ready"
+        "--work",
+        ".yukon/reports/bls12-381-invert-g1"
       ],
       "scorePath": ".yukon/scores/bls12-381-invert-g1.json",
-      "maxSubmissionBytes": 4194304
+      "maxSubmissionBytes": 4194304,
+      "runner": {
+        "provider": "github-actions",
+        "workflow": "bls12-381-invert-g1.yml",
+        "maxConcurrentWorkflows": 2
+      }
     }
   ]
 }

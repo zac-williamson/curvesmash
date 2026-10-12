@@ -1,20 +1,77 @@
 {
   "schema_version": 1,
   "id": "rigorous-review-v1",
-  "reviewers": {},
-  "definition_approvers": {},
+  "reviewers": {
+    "evaluability": {
+      "roles": [
+        "evaluability"
+      ],
+      "public_key": "90755c3bf46e3964ae7dd72fa07f0e9679e3f35460f8f900095839998c985a62"
+    },
+    "cryptanalysis": {
+      "roles": [
+        "cryptanalysis"
+      ],
+      "public_key": "e117365384d1df4570bbd21177125cc0151b1d7b297fa4bfa7502f22e7613849"
+    },
+    "cost": {
+      "roles": [
+        "cost"
+      ],
+      "public_key": "b14885c5e731addad682ec28aec75503bb388ff43cd541e8107d5789205a70c2"
+    },
+    "experiments": {
+      "roles": [
+        "experiments"
+      ],
+      "public_key": "c92c6bf464c862327e1ac2293d369357de5a0c621d647dbd776cb245a6fd21eb"
+    },
+    "defender": {
+      "roles": [
+        "defender"
+      ],
+      "public_key": "464ba46e3881d84c9b9312d4a8f2349ea08940e65c212131a7519768c096c9ac"
+    },
+    "adjudicator": {
+      "roles": [
+        "adjudicator"
+      ],
+      "public_key": "9d839e54a88bc9924f6bfde5bbd40555a316c3325c1283f5bf2e2b410c77de82"
+    },
+    "execution": {
+      "roles": [
+        "execution"
+      ],
+      "public_key": "1ebd8f10b4c9e4697ecd965a1f92b2571f2845d836bf110e8162b708eb4939e8"
+    }
+  },
+  "definition_approvers": {
+    "definitions": {
+      "roles": [
+        "definitions"
+      ],
+      "public_key": "bd25a7e30d58761fad24b3ebe3c69507f395c5a44e722a5eda146f82316ef263"
+    }
+  },
   "maximum_review_age_days": 30,
   "maximum_definition_age_days": 365,
   "minimum_distinct_initial_reviewers": 4,
-  "experiment_image": null,
+  "experiment_image": "python@sha256:a6e34c598f2467ed0e9a8d349809fcd8b5c603269512df273a0bb1784edc11b1",
   "experiment_max_trials": 8,
   "experiment_timeout_seconds": 30,
   "experiment_memory_bytes": 536870912,
   "experiment_output_bytes": 65536,
   "provider": {
     "endpoint": "https://openrouter.ai/api/v1/chat/completions",
-    "models": {},
-    "timeout_seconds": 60,
-    "max_tokens": 12000
+    "models": {
+      "evaluability": "openai/gpt-5.6-sol",
+      "cryptanalysis": "openai/gpt-5.6-sol",
+      "cost": "openai/gpt-5.6-sol",
+      "experiments": "openai/gpt-5.6-sol",
+      "defender": "openai/gpt-5.6-sol",
+      "adjudicator": "openai/gpt-5.6-sol"
+    },
+    "timeout_seconds": 600,
+    "max_tokens": 16000
   }
 }

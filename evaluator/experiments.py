@@ -69,7 +69,7 @@ def bounded_process(command, stdin, timeout, limit):
             stream.close()
 
 
-def run(record, policy, reviewer, private_bytes):
+def run(record, policy, reviewer, private_bytes=None):
     evidence = check_evidence(record)
     require(evidence["experiment_required"], "No experiment requested")
     experiment = evidence["claim"]["experiment"]
@@ -106,6 +106,11 @@ def run(record, policy, reviewer, private_bytes):
         "issued_at": datetime.now(timezone.utc).isoformat(), "binding": record["binding"],
         "image": policy["experiment_image"], "results": results,
         "scope": "Finite uniform full-parameter targets; no production complexity or success bound inferred."}
+    if private_bytes is None:
+        # The credential-free execution job emits this body. Only the trusted
+        # review job may attest its same-run artifact, after rechecking outputs.
+        validate_body(body, record, policy)
+        return body
     signed = sign(body, private_bytes)
     validate_report(signed, record, policy)
     return signed
@@ -113,6 +118,10 @@ def run(record, policy, reviewer, private_bytes):
 
 def validate_report(report, record, policy):
     body = verify(report, policy, "execution", record["binding"])
+    validate_body(body, record, policy)
+
+
+def validate_body(body, record, policy):
     exact(body, ("kind", "reviewer", "issued_at", "binding", "image", "results", "scope"))
     require(body["kind"] == "experiment" and body["image"] == policy["experiment_image"],
             "Wrong execution provenance")
