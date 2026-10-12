@@ -2,11 +2,11 @@
 
 The website is public at **https://curvesma.sh**, with **https://curvesmash.zac342230.chatgpt.site** also available. No login or ChatGPT account is required. This is separate from Yukon's pending challenge registration.
 
-Verified deployment on 12 October 2026:
+Verified deployment on 13 October 2026:
 
 - Site: `appgprj_6acd447ed9a48191a56ad6915a49f770`
-- Deployment: `appgdep_6acd460f64c08191b8d9d2b5aa6e884a`, succeeded
-- Hosted source commit: `9d76707a9307fc8b3f632c148472aefe5f1fb98a`
+- Deployment: `appgdep_6acd73fa2b748191b5447d32331702ec`, succeeded
+- Hosted source commit: `862aebe912d52c77f1c9678f58d8297e60836292`
 - Static files: `dist/`, no build step or runtime secrets
 
 ## Connect curvesma.sh
