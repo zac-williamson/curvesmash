@@ -19,7 +19,7 @@ The [cost model](cost-models/classical-word-ram-v1.json) uses HashSmash's 256-bi
 
 ## Build sequence
 
-1. Review the versioned target/cost specifications and qualify a best-known baseline for each track.
+1. Review the versioned target/cost specifications and qualify a fully accounted baseline for each track. A generic control is eligible; label it honestly and keep best-known attack comparisons separate.
 2. Implement independent mathematical checks, isolated experiments, and cryptanalysis/cost review. Bind each score to its submission, definitions, and evidence; require manual promotion.
 3. Register with Yukon while submissions remain closed, then verify baseline runs and the review/promotion lifecycle.
 4. Connect curvesma.sh to a two-row results page with baseline cost, best accepted cost, and evidence links.
@@ -28,7 +28,7 @@ Use [HashSmash's builder guide](https://github.com/Layr-Labs/hash-smash/blob/mai
 
 ## Current status
 
-Private prelaunch project. Version 1 specifications, two analytic baseline packages and the [evaluator](docs/EVALUATION.md) are implemented. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls; best-known attack selection and independent qualification remain pending. Production review provisioning, Yukon integration and the website remain outstanding. Nothing is open or scored.
+Private prelaunch project. Version 1 specifications, two analytic baseline packages and the [evaluator](docs/EVALUATION.md) are implemented. The packages use deterministic baby-step/giant-step with complete cost ledgers and success probability 1. They are conservative accounting controls awaiting qualification, not best-known attack estimates. Production review provisioning, Yukon integration and the website remain outstanding. Nothing is open or scored.
 
 - [secp256k1 baseline](candidates/secp256k1-ecdlp/README.md)
 - [BLS12-381 inversion baseline](candidates/bls12-381-invert-g1/README.md)
