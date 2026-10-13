@@ -2,7 +2,7 @@
 
 A standalone static page following the presentation of [HashSma.sh](https://hashsma.sh), which redirects to Yukon's HashSmash challenge page. The HTML, styling and elliptic-curve illustration are original; no HashSmash source, proprietary fonts, partner logos or judge identities are copied.
 
-The page presents exactly two full-production targets and the verified version 2 baselines. Results are a published snapshot, not a live Yukon leaderboard. Registration is pending and no submit endpoint is exposed. Participation opens the actual preparation instructions. Once Yukon supplies the registered challenge URL, replace the pending participation flow with that verified URL.
+The page presents exactly two full-production targets and the verified version 2 baselines. Results are a published snapshot, not a live Yukon leaderboard. Registration is pending and no submit endpoint is exposed. Participate offers a target-specific, copyable agent prompt and numbered human instructions. Local research starts without API keys. Once Yukon registers the challenge, add its verified benchmark identity and live clone/submission instructions to this flow.
 
 ## Preview
 

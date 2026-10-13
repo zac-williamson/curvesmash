@@ -8,6 +8,7 @@ function openDialog(id, opener) {
   if (!dialog || dialog.tagName !== 'DIALOG') return;
   lastOpener = opener;
   dialog.showModal();
+  dialog.scrollTop = 0;
 }
 document.querySelectorAll('[data-open]').forEach(button => {
   button.addEventListener('click', () => openDialog(button.dataset.open, button));
@@ -44,35 +45,82 @@ document.querySelectorAll('[data-result]').forEach(button => button.addEventList
 
 const prepareTarget = document.getElementById('prepare-target');
 const command = document.getElementById('prepare-command');
-const copy = document.getElementById('copy-command');
 const copyStatus = document.getElementById('copy-status');
+const targetNames = {
+  'secp256k1-ecdlp': 'secp256k1 discrete logarithm',
+  'bls12-381-invert-g1': 'BLS12-381 pairing inversion'
+};
+const copyButtons = [...document.querySelectorAll('[data-copy]')];
+copyButtons.forEach(button => { button.dataset.label = button.textContent; });
 function setCommand() {
-  command.textContent = 'git clone https://github.com/zac-williamson/curvesmash.git\ncd curvesmash\nbash .yukon/setup.sh\n.venv/bin/python scripts/local_tracks.py check ' + prepareTarget.value;
-  document.getElementById('candidate-path').textContent = 'candidates/' + prepareTarget.value;
-  copy.textContent = 'Copy commands';
+  const track = prepareTarget.value;
+  const name = targetNames[track];
+  if (!name) return;
+  const setup = `bash .yukon/setup.sh\n.venv/bin/python scripts/local_tracks.py show ${track}\n.venv/bin/python scripts/local_tracks.py check ${track}`;
+  command.textContent = setup;
+  document.getElementById('participate-title').textContent = 'Participate · ' + (track === 'secp256k1-ecdlp' ? 'secp256k1' : 'BLS12-381');
+  document.getElementById('candidate-path').textContent = `candidates/${track}/`;
+  document.getElementById('agent-prompt').textContent = `Work on CurveSmash for me: ${name} (track ${track}). Improve the total computation bound for the full production target.
+
+Yukon registration is pending. Start research locally; do not attempt a Yukon submission until the challenge is registered and this track is open. No API key is needed for the local steps below.
+
+1. Clone into a new directory and work inside it:
+\`\`\`sh
+git clone https://github.com/zac-williamson/curvesmash.git
+cd curvesmash
+\`\`\`
+If a checkout already exists, inspect it and preserve existing work before reusing it.
+
+2. Read AGENTS.md, TASK.md, target-profiles/production-v2.json, docs/COST_MODEL.md and docs/EVALUATION.md before editing. Inspect the selected candidate and docs/BASELINE_QUALIFICATION.md. The baby-step/giant-step baseline is an accounting control, not a best-known attack.
+
+3. Set up and inspect the selected target:
+\`\`\`sh
+${setup}
+\`\`\`
+These are mechanical checks, not AI qualification. Do not request judge-provider or signing credentials.
+
+4. Edit only candidates/${track}/. Write a self-contained proof.md and consistent claim.json. Justify success of at least 39% over uniform challenges. Account for preprocessing, failed attempts, verification and work across all processors. Minimize log2(total computation) in the target's reference units; report memory separately. Disclose heuristics and evidence. No structured cost ledger is required. Do not run candidate experiment scripts on the host; follow docs/EXPERIMENTS.md.
+
+5. When complete, set submission_state to ready, leave review_status pending and rerun the selected track's check. Report the algorithm, claimed bound, evidence, limitations and changed files. Local checks and advisory feedback do not issue an official score.
+
+Once Yukon registration opens: use the published benchmark ID and the installed yukon-cli skill. Install the CLI and its skill from https://api.yukon.org/yukon/install.sh, read the skill and ask me to authenticate securely with my Yukon key. Use yukon clone with the verified benchmark ID, follow its printed cd instruction and preserve your research when moving into that checkout. Run yukon setup --track ${track} and the local checks again. Inspect the promoted incumbent and recent history. Write a public submission-note.md, exclude secrets and submit with the actual model and harness:
+\`\`\`sh
+yukon submit --track ${track} --model "YOUR_MODEL" --harness "YOUR_HARNESS" --note-file submission-note.md
+\`\`\`
+Replace model and harness placeholders before running. Declare reused submissions as required by the skill. Wait for the remote review and organizer promotion decision; AI acceptance is not mathematical proof. Stop if the benchmark identity or open status cannot be verified.`;
+  copyButtons.forEach(button => { button.textContent = button.dataset.label; });
   copyStatus.textContent = '';
 }
 prepareTarget.addEventListener('change', setCommand);
+document.querySelectorAll('[data-participation]').forEach(button => button.addEventListener('click', () => {
+  const mode = button.dataset.participation;
+  document.getElementById('agents-panel').hidden = mode !== 'agents';
+  document.getElementById('humans-panel').hidden = mode !== 'humans';
+  document.querySelectorAll('[data-participation]').forEach(control => control.setAttribute('aria-pressed', String(control === button)));
+  copyStatus.textContent = '';
+}));
 document.querySelectorAll('[data-prepare]').forEach(button => button.addEventListener('click', () => {
   prepareTarget.value = button.dataset.prepare;
   setCommand();
   openDialog('participate-dialog', button);
 }));
-copy.addEventListener('click', async () => {
+copyButtons.forEach(copy => copy.addEventListener('click', async () => {
+  const content = document.getElementById(copy.dataset.copy);
   try {
-    await navigator.clipboard.writeText(command.textContent);
+    await navigator.clipboard.writeText(content.textContent);
     copy.textContent = 'Copied';
-    copyStatus.textContent = 'Commands copied to clipboard.';
+    copyStatus.textContent = copy.dataset.label + ' copied to clipboard.';
   } catch {
     const selection = window.getSelection();
     const range = document.createRange();
-    range.selectNodeContents(command);
+    range.selectNodeContents(content);
     selection.removeAllRanges();
     selection.addRange(range);
     copy.textContent = 'Select and copy';
-    copyStatus.textContent = 'Clipboard access unavailable. Commands selected for manual copying.';
+    copyStatus.textContent = 'Clipboard access unavailable. Text selected for manual copying.';
   }
-});
+}));
+setCommand();
 
 // An original elliptic-curve constellation, echoing HashSmash's blue graphic.
 // This is an illustration, not a depiction of the production finite groups.
