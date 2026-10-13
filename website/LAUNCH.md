@@ -5,8 +5,8 @@ The website is public at **https://curvesma.sh**, with **https://curvesmash.zac3
 Verified deployment on 13 October 2026:
 
 - Site: `appgprj_6acd447ed9a48191a56ad6915a49f770`
-- Deployment: `appgdep_6acd73fa2b748191b5447d32331702ec`, succeeded
-- Hosted source commit: `862aebe912d52c77f1c9678f58d8297e60836292`
+- Deployment: `appgdep_6acd76a50e0481919a73176f1312cc5c`, succeeded
+- Hosted source commit: `12f9ac98397b46d988ada0f78373f5c0617cdf86`
 - Static files: `dist/`, no build step or runtime secrets
 
 ## Connect curvesma.sh
@@ -33,7 +33,7 @@ Use the actual registered challenge URL supplied by Yukon. Replace the preparati
 - Desktop and mobile rendering; no page-wide horizontal overflow at 375px.
 - Results/Tracks switch, target filters, chart-to-result links and both baseline detail panels.
 - How it works, Review process and Participate dialogs, keyboard dismissal and focus return.
-- Target-specific commands and successful clipboard copy.
+- For agents / For humans participation modes; numbered steps, target-specific full agent prompts and successful clipboard copying of prompts and commands.
 - Displayed scores and memory figures checked against signed qualification records.
 - No browser console errors observed; JavaScript syntax and local assets checked.
 - Hosted source pushed and packaged through the Sites workflow; native deployment reports success. Public access was confirmed by the host and verified with anonymous HTTP requests and a browser visit.
