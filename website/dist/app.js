@@ -122,6 +122,43 @@ copyButtons.forEach(copy => copy.addEventListener('click', async () => {
 }));
 setCommand();
 
+// Public roster only; judging and reviewer permissions remain in Yukon.
+const meetJudges = document.getElementById('meet-judges');
+const judgesBanner = document.getElementById('judges-banner');
+function showJudges(show) {
+  judgesBanner.hidden = !show;
+  meetJudges.setAttribute('aria-expanded', String(show));
+}
+meetJudges.addEventListener('click', () => showJudges(judgesBanner.hidden));
+document.getElementById('close-judges').addEventListener('click', () => {
+  showJudges(false);
+  meetJudges.focus();
+});
+fetch('./judges.json').then(response => {
+  if (!response.ok) throw new Error('Roster unavailable');
+  return response.json();
+}).then(judges => {
+  if (!Array.isArray(judges) || !judges.length || judges.some(judge =>
+    !judge || typeof judge.name !== 'string' || !judge.name.trim() ||
+    typeof judge.affiliation !== 'string')) return;
+  const list = document.getElementById('judges-list');
+  judges.forEach((judge, index) => {
+    const card = document.createElement('div');
+    const label = document.createElement('p');
+    label.className = 'judge-label';
+    label.textContent = `Judge ${index + 1}`;
+    const name = document.createElement('h3');
+    name.textContent = judge.name;
+    const affiliation = document.createElement('p');
+    affiliation.textContent = judge.affiliation;
+    card.append(label, name, affiliation);
+    list.appendChild(card);
+  });
+  meetJudges.hidden = false;
+}).catch(() => {
+  // Keep the roster hidden when it cannot be loaded. Never substitute names.
+});
+
 // An original elliptic-curve constellation, echoing HashSmash's blue graphic.
 // This is an illustration, not a depiction of the production finite groups.
 const svgNS = 'http://www.w3.org/2000/svg';
