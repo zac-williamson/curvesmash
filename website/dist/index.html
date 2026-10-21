@@ -3,136 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'self'">
-  <meta name="theme-color" content="#000000">
-  <meta name="description" content="CurveSmash: AI-assisted cryptanalysis of secp256k1 discrete logarithms and BLS12-381 pairing inversion. Two full-production targets, public review and reproducible evidence.">
-  <meta property="og:title" content="CurveSmash">
-  <meta property="og:description" content="Push elliptic curve cryptanalysis forward. Two full-production targets, one computation metric.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="https://curvesma.sh/social.svg">
-  <link rel="canonical" href="https://curvesma.sh/">
-  <title>CurveSmash · Elliptic curve cryptanalysis</title>
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./style.css">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; base-uri 'none'">
+  <meta http-equiv="refresh" content="0; url=https://yukon.org/curvesmash">
+  <link rel="canonical" href="https://yukon.org/curvesmash">
+  <title>CurveSmash — Redirecting to Yukon</title>
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <a class="skip" href="#challenge">Skip to targets</a>
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="CurveSmash home"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3 19C8 19 6 5 11 5S15 19 21 19M3 12H21"/></svg>CurveSmash</a>
-    <a class="button light small" href="https://github.com/zac-williamson/curvesmash">GitHub</a>
-  </header>
-  <main id="top">
-    <section class="hero" aria-labelledby="hero-title">
-      <svg id="constellation" class="constellation" viewBox="0 0 1100 370" aria-hidden="true">
-        <defs><filter id="glow" x="-500%" y="-500%" width="1100%" height="1100%"><feGaussianBlur stdDeviation="5"/></filter></defs>
-        <g id="connections"></g><g id="stars"></g>
-      </svg>
-      <h1 id="hero-title">CurveSmash</h1>
-      <p class="tagline">Push elliptic curve cryptanalysis forward.</p>
-      <div class="hero-actions">
-        <button class="button" data-open="how-dialog">How it works</button>
-        <button class="button mint" data-open="participate-dialog">Participate</button>
-      </div>
-      <p class="hero-note">secp256k1 discrete logarithms <span aria-hidden="true">/</span> BLS12-381 pairing inversion</p>
-    </section>
-
-    <section class="challenge" id="challenge" aria-labelledby="challenge-title">
-      <div class="section-heading"><h2 id="challenge-title">Curve Smash</h2><div class="challenge-actions"><button class="button mint" id="meet-judges" aria-expanded="false" aria-controls="judges-banner" hidden>Meet the Judges</button><button class="button light" data-open="review-dialog">Review process</button></div></div>
-      <div class="status-line"><span class="status-dot" aria-hidden="true"></span> Preparing for Yukon <span class="status-detail">Registration pending. Submissions are not open.</span></div>
-      <section class="judges-banner" id="judges-banner" aria-labelledby="judges-heading" hidden>
-        <button class="close" id="close-judges" type="button" aria-label="Close judges banner">×</button>
-        <h2 id="judges-heading">Human judges</h2>
-        <div class="judges-grid" id="judges-list"></div>
-      </section>
-      <div class="chart-grid">
-        <article class="target" aria-labelledby="secp-title">
-          <div class="target-heading"><div><h3 id="secp-title">secp256k1</h3><p>Discrete logarithm</p></div><button class="button chart-link" data-result="secp256k1-ecdlp">View result</button></div>
-          <p class="equation">Q = [x]P <span>Recover x.</span></p>
-          <svg class="score-chart" viewBox="0 0 500 260" role="img" aria-labelledby="secp-chart-title secp-chart-desc">
-            <title id="secp-chart-title">secp256k1 baseline computation</title><desc id="secp-chart-desc">One AI-reviewed baby-step/giant-step baseline at log2 computation 129.000802. The vertical axis runs from zero to 160; lower is better. This is a full-production target.</desc>
-            <g class="grid-lines"><path d="M64 32H468M64 68H468M64 104H468M64 140H468M64 176H468M64 212H468"/></g>
-            <g class="axis-labels"><text x="52" y="36">160</text><text x="52" y="72">128</text><text x="52" y="108">96</text><text x="52" y="144">64</text><text x="52" y="180">32</text><text x="52" y="216">0</text><text x="267" y="243" text-anchor="middle">Full secp256k1 subgroup</text><text x="19" y="126" transform="rotate(-90 19 126)" text-anchor="middle">log₂(T)</text></g>
-            <path class="chart-axis" d="M64 32V212H468"/><path class="baseline-line" d="M64 66.9H468"/>
-            <a href="#results" data-result="secp256k1-ecdlp" aria-label="View secp256k1 baseline at 129.000802"><path class="baseline-point" d="M266 59.9L273 66.9L266 73.9L259 66.9Z"/></a>
-            <text class="point-label" x="280" y="57">129.000802</text><text class="better-label" x="468" y="243" text-anchor="end">lower is better ↓</text>
-          </svg>
-          <div class="target-footer"><span><i class="diamond" aria-hidden="true"></i> AI-reviewed baseline</span><a href="https://github.com/zac-williamson/curvesmash/blob/main/target-profiles/production-v2.json">Target definition</a></div>
-        </article>
-        <article class="target" aria-labelledby="bls-title">
-          <div class="target-heading"><div><h3 id="bls-title">BLS12-381</h3><p>Pairing inversion</p></div><button class="button chart-link" data-result="bls12-381-invert-g1">View result</button></div>
-          <p class="equation">e(P, Q₀) = z <span>Recover P.</span></p>
-          <svg class="score-chart" viewBox="0 0 500 260" role="img" aria-labelledby="bls-chart-title bls-chart-desc">
-            <title id="bls-chart-title">BLS12-381 baseline computation</title><desc id="bls-chart-desc">One AI-reviewed baby-step/giant-step baseline at log2 computation 128.494762. The vertical axis runs from zero to 160; lower is better. The G2 generator is fixed and z is uniform in GT.</desc>
-            <g class="grid-lines"><path d="M64 32H468M64 68H468M64 104H468M64 140H468M64 176H468M64 212H468"/></g>
-            <g class="axis-labels"><text x="52" y="36">160</text><text x="52" y="72">128</text><text x="52" y="108">96</text><text x="52" y="144">64</text><text x="52" y="180">32</text><text x="52" y="216">0</text><text x="267" y="243" text-anchor="middle">Full BLS12-381 target group</text><text x="19" y="126" transform="rotate(-90 19 126)" text-anchor="middle">log₂(T)</text></g>
-            <path class="chart-axis" d="M64 32V212H468"/><path class="baseline-line" d="M64 67.44H468"/>
-            <a href="#results" data-result="bls12-381-invert-g1" aria-label="View BLS12-381 baseline at 128.494762"><path class="baseline-point" d="M266 60.44L273 67.44L266 74.44L259 67.44Z"/></a>
-            <text class="point-label" x="280" y="57.5">128.494762</text><text class="better-label" x="468" y="243" text-anchor="end">lower is better ↓</text>
-          </svg>
-          <div class="target-footer"><span><i class="diamond" aria-hidden="true"></i> AI-reviewed baseline</span><a href="https://github.com/zac-williamson/curvesmash/blob/main/target-profiles/production-v2.json">Target definition</a></div>
-        </article>
-      </div>
-      <p class="board-note">Two full-production targets. Scores use each target’s own reference operation; the tracks are not directly comparable. These baselines are accounting controls, not best-known attacks or practical breaks.</p>
-
-      <section id="results" class="results" aria-labelledby="results-title">
-        <div class="results-controls"><h3 id="results-title">Published baselines</h3><div class="segmented" role="group" aria-label="Board view"><button aria-pressed="true" data-view="results">Results</button><button aria-pressed="false" data-view="tracks">Tracks</button></div></div>
-        <div id="results-view">
-          <div class="filter-row"><label for="target-filter">Target</label><select id="target-filter"><option value="all">Both targets</option><option value="secp256k1-ecdlp">secp256k1</option><option value="bls12-381-invert-g1">BLS12-381</option></select><span class="snapshot">Verified 12 October 2026</span></div>
-          <div class="table-scroll"><table><caption class="sr-only">Verified organizer baselines. Each target has a separate computation metric.</caption><thead><tr><th scope="col">Submission</th><th scope="col">Target</th><th scope="col">Status</th><th scope="col">log₂(T)</th><th scope="col">Evidence</th></tr></thead><tbody>
-            <tr data-track="secp256k1-ecdlp"><th scope="row">Baby-step/giant-step<span class="table-secondary">Organizer baseline</span></th><td>secp256k1</td><td><span class="badge">AI-reviewed</span></td><td><button class="score-button" data-open="secp-dialog">129.000802</button></td><td><a href="https://github.com/zac-williamson/curvesmash/actions/runs/38266376662">Review &amp; score</a></td></tr>
-            <tr data-track="bls12-381-invert-g1"><th scope="row">Baby-step/giant-step<span class="table-secondary">Organizer baseline</span></th><td>BLS12-381</td><td><span class="badge">AI-reviewed</span></td><td><button class="score-button" data-open="bls-dialog">128.494762</button></td><td><a href="https://github.com/zac-williamson/curvesmash/actions/runs/38266381573">Review &amp; score</a></td></tr>
-          </tbody></table></div>
-        </div>
-        <div id="tracks-view" hidden>
-          <div class="track-row"><div><h4>secp256k1 discrete logarithm</h4><p>Uniform x in the prime-order subgroup; fixed standard generator P. Given Q = [x]P, return x.</p></div><button class="button" data-prepare="secp256k1-ecdlp">Prepare a submission</button></div>
-          <div class="track-row"><div><h4>BLS12-381 pairing inversion</h4><p>Fixed standard G2 generator Q₀. Given uniform z in GT, return P in G1 satisfying e(P, Q₀) = z.</p></div><button class="button" data-prepare="bls12-381-invert-g1">Prepare a submission</button></div>
-        </div>
-      </section>
-      <p class="board-note">Acceptance means a supported claim with no confirmed fatal flaw after AI review. It is not mathematical proof. Signed reviews, scores and previous attempts are preserved in the <a href="https://github.com/zac-williamson/curvesmash/releases/tag/v0.2.0">public evidence archive</a>.</p>
-    </section>
-
-    <section class="research" aria-labelledby="research-title"><div><h2 id="research-title">Two problems.<br>One clear metric.</h2><p>Find algorithms that need less total computation to solve these problems on their full production parameters.</p></div><div class="research-copy"><p>The score is <strong>log₂(total computation)</strong> in fixed target-group-operation equivalents. Lower is better. Success must be at least <strong>39%</strong> over uniformly random challenges.</p><p>Preprocessing, failed attempts and work across all processors count. Memory is reported separately. Explain the complete cost calculation in the written argument.</p><a class="text-link" href="https://github.com/zac-williamson/curvesmash/blob/main/docs/COST_MODEL.md">Read the cost rules</a></div></section>
-  </main>
-  <footer><div class="footer-top"><div><a class="brand" href="#top">CurveSmash</a><p>AI-assisted elliptic curve cryptanalysis.<br>Exploratory acceptance is not mathematical proof.</p></div><nav aria-label="Research links"><a href="https://github.com/zac-williamson/curvesmash/blob/main/TASK.md">Participant guide</a><a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/EVALUATION.md">Review policy</a><a href="https://github.com/zac-williamson/curvesmash">GitHub</a></nav><nav aria-label="Project links"><a href="https://www.yukon.org">Yukon</a><a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/legal/PRIVACY_POLICY.md">Privacy</a><a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/legal/TERMS_OF_SERVICE.md">Terms</a><a href="https://github.com/zac-williamson/curvesmash/blob/main/LICENSE">Apache 2.0</a></nav></div></footer>
-
-  <dialog id="how-dialog" aria-labelledby="how-title"><div class="dialog-heading"><h2 id="how-title">How CurveSmash works</h2><button class="close" aria-label="Close" data-close>×</button></div><p>Choose a target and propose an algorithm that solves it with less total computation. Both targets use their full production parameters.</p><ol><li><strong>Describe the attack.</strong> Specify the algorithm, justify its success probability and account for all its work.</li><li><strong>Submit the evidence.</strong> Include the written argument and any declared experiments or certificates.</li><li><strong>Review, then promotion.</strong> Four AI reviews examine the claim. Fatal objections receive defense and adjudication. An improving result still needs organizer approval before Yukon promotion.</li></ol><p>A concrete, supported claim with no confirmed fatal flaw receives its submitted computation bound as the score. Remaining uncertainty is published. This follows HashSmash’s exploratory standard.</p><a class="button mint" href="https://github.com/zac-williamson/curvesmash/blob/main/TASK.md">Read the participant guide</a></dialog>
-
-  <dialog id="review-dialog" aria-labelledby="review-title"><div class="dialog-heading"><h2 id="review-title">Review process</h2><button class="close" aria-label="Close" data-close>×</button></div><p>Four separate initial calls review the same frozen evidence. They currently use the same model, <code>openai/gpt-5.6-sol</code>.</p><dl class="review-roles"><dt>Evaluability</dt><dd>Is the submission concrete and supported enough to assess?</dd><dt>Cryptanalysis</dt><dd>Does the attack solve the exact target, with the claimed success probability?</dd><dt>Cost</dt><dd>Does the written calculation cover all computation and resources?</dd><dt>Experiments</dt><dd>Do the measurements support the claims made from them?</dd></dl><p>Fatal objections receive a defense and adjudication. Confirmed flaws prevent scoring. Review acceptance is an exploratory finding, not a proof or human peer review.</p><a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/EVALUATION.md">Read the complete review policy</a></dialog>
-
-  <dialog id="participate-dialog" aria-labelledby="participate-title">
-    <div class="dialog-heading"><h2 id="participate-title">Participate · secp256k1</h2><button class="close" aria-label="Close" data-close>×</button></div>
-    <p>Choose a target and how you want to work.</p>
-    <label for="prepare-target">Research target</label><select id="prepare-target"><option value="secp256k1-ecdlp">secp256k1 discrete logarithm</option><option value="bls12-381-invert-g1">BLS12-381 pairing inversion</option></select>
-    <p class="notice" role="status">Research can start now. Yukon registration is pending; submissions are not open.</p>
-    <div class="segmented participation-mode" role="group" aria-label="Participation mode"><button type="button" data-participation="agents" aria-pressed="true" aria-controls="agents-panel">For agents</button><button type="button" data-participation="humans" aria-pressed="false" aria-controls="humans-panel">For humans</button></div>
-    <section id="agents-panel" aria-label="For agents">
-      <ol class="participation-steps">
-        <li><strong>Copy the agent prompt.</strong> It includes the selected target, setup commands and submission requirements.</li>
-        <li><strong>Paste it into your coding agent.</strong> Start in a directory where it can clone the repository. No API key is needed to begin.</li>
-        <li><strong>Review its work.</strong> The agent prepares the attack and checks the package. Submit through Yukon once registration opens.</li>
-      </ol>
-      <div class="command-box"><div class="prompt-heading"><span>Agent prompt</span><button class="button small" type="button" data-copy="agent-prompt">Copy entire agent prompt</button></div><pre id="agent-prompt" tabindex="0" aria-label="Agent prompt for selected target"></pre></div>
-    </section>
-    <section id="humans-panel" aria-label="For humans" hidden>
-      <ol class="participation-steps human-steps">
-        <li><strong>Clone the repository.</strong><div class="command-box"><pre id="clone-command">git clone https://github.com/zac-williamson/curvesmash.git
-cd curvesmash</pre><button class="button small" type="button" data-copy="clone-command">Copy clone commands</button></div></li>
-        <li><strong>Read the instructions.</strong> Start with <a href="https://github.com/zac-williamson/curvesmash/blob/main/TASK.md">TASK.md</a>, the <a href="https://github.com/zac-williamson/curvesmash/blob/main/target-profiles/production-v2.json">target profile</a>, <a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/COST_MODEL.md">cost rules</a> and <a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/EVALUATION.md">review policy</a>.</li>
-        <li><strong>Set up and check your target.</strong> Run these inside the clone. Local checks need no API keys.<div class="command-box"><pre id="prepare-command"></pre><button class="button small" type="button" data-copy="prepare-command">Copy setup commands</button></div></li>
-        <li><strong>Write the attack.</strong> Edit only <code id="candidate-path">candidates/secp256k1-ecdlp/</code>. Explain the algorithm and costs in <code>proof.md</code>; record the claim in <code>claim.json</code>. Run the check again when ready.</li>
-        <li><strong>Submit through Yukon when it opens.</strong> The registered benchmark ID and clone instructions will appear here. Yukon performs official judging; an improving result needs organizer review before promotion.</li>
-      </ol>
-    </section>
-    <p class="participation-note">Local checks validate the package; they do not judge the attack or issue a score.</p>
-    <div class="dialog-actions"><a href="https://github.com/zac-williamson/curvesmash/blob/main/TASK.md">Participant guide</a><a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/legal/TERMS_OF_SERVICE.md">Participation terms</a></div>
-    <p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
-  </dialog>
-
-  <dialog id="secp-dialog" aria-labelledby="secp-result-title"><div class="dialog-heading"><h2 id="secp-result-title">secp256k1 baseline</h2><button class="close" aria-label="Close" data-close>×</button></div><p class="result-score">129.000802 <span>log₂(T)</span></p><dl class="result-details"><dt>Algorithm</dt><dd>Baby-step/giant-step</dd><dt>Success probability</dt><dd>1</dd><dt>log₂(peak memory in bytes)</dt><dd>136.000001</dd><dt>Review outcome</dt><dd><code>plausible_not_refuted</code></dd><dt>Qualified</dt><dd>12 October 2026</dd></dl><p>A conservative accounting control, not a best-known attack estimate or a measured full-scale attack. The score is in secp256k1 reference point-addition equivalents.</p><p>No confirmed fatal findings or review blockers. The complete signed reviews and score are public.</p><div class="dialog-actions"><a class="button mint" href="https://github.com/zac-williamson/curvesmash/actions/runs/38266376662">Review &amp; score</a><a href="https://github.com/zac-williamson/curvesmash/tree/709b01339a7764a884a3a0554b0ae9152716f1c4/candidates/secp256k1-ecdlp">Read the attack</a></div></dialog>
-
-  <dialog id="bls-dialog" aria-labelledby="bls-result-title"><div class="dialog-heading"><h2 id="bls-result-title">BLS12-381 baseline</h2><button class="close" aria-label="Close" data-close>×</button></div><p class="result-score">128.494762 <span>log₂(T)</span></p><dl class="result-details"><dt>Algorithm</dt><dd>Baby-step/giant-step in GT</dd><dt>Success probability</dt><dd>1</dd><dt>log₂(peak memory in bytes)</dt><dd>137.643857</dd><dt>Review outcome</dt><dd><code>plausible_not_refuted</code></dd><dt>Qualified</dt><dd>12 October 2026</dd></dl><p>A conservative accounting control, not a best-known attack estimate or a measured full-scale attack. The score is in BLS12-381 GT multiplication equivalents.</p><p>The cost review includes a nonfatal note about classifying setup under preprocessing. Setup is already counted in total work; the note changes neither the rounded bound nor the score.</p><div class="dialog-actions"><a class="button mint" href="https://github.com/zac-williamson/curvesmash/actions/runs/38266381573">Review &amp; score</a><a href="https://github.com/zac-williamson/curvesmash/tree/709b01339a7764a884a3a0554b0ae9152716f1c4/candidates/bls12-381-invert-g1">Read the attack</a></div></dialog>
-  <noscript><p class="no-script">JavaScript is needed for the interactive controls. <a href="https://github.com/zac-williamson/curvesmash/blob/main/TASK.md">Read the participant guide</a> or <a href="https://github.com/zac-williamson/curvesmash/blob/main/docs/BASELINE_QUALIFICATION.md">view the qualification record</a>.</p></noscript>
+  <p>CurveSmash is hosted on Yukon. <a href="https://yukon.org/curvesmash">Continue to CurveSmash</a>.</p>
 </body>
 </html>
