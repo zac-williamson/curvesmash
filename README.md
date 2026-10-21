@@ -25,3 +25,16 @@ bash .yukon/setup.sh
 .venv/bin/python scripts/local_tracks.py check bls12-381-invert-g1
 .venv/bin/python -m unittest discover -s tests -v
 ```
+
+## License
+
+Copyright 2026 Zac Williamson. The original challenge materials in this
+repository, including the rules, cost model, documentation, website and both
+organizer baseline submissions, are licensed under the
+[Apache License 2.0](LICENSE). Third-party material retains its own licence and
+attribution; in particular, the pairing baseline includes the
+[py_ecc MIT notice](candidates/bls12-381-invert-g1/py-ecc-LICENSE.txt).
+
+Eigen Labs hosts the Yukon challenge under the Terms of Service and Privacy
+Policy published on its challenge page. The repository licence grants reuse
+rights to the materials; it does not replace those service policies.
